@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FyLink – Real‑Time Event Photo Upload</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --text-main: #111;
+      --text-muted: #666;
+      --accent: #000;
+      --border-soft: #eaeaea;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-main);
+      background: #fff;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 48px 24px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+
+    header h1 {
+      font-size: clamp(40px, 6vw, 72px);
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+
+    header p {
+      margin-top: 8px;
+      font-size: 16px;
+      color: var(--text-muted);
+    }
+
+    .hero-image {
+      width: 100%;
+      margin: 56px 0;
+    }
+
+    .hero-image img {
+      width: 100%;
+      border-radius: 14px;
+      display: block;
+      object-fit: cover;
+    }
+
+    .content {
+      max-width: 760px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .content h2 {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+
+    .content p {
+      font-size: 16px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+      margin: 48px 0;
+      text-align: left;
+    }
+
+    .feature {
+      border: 1px solid var(--border-soft);
+      border-radius: 12px;
+      padding: 20px 22px;
+    }
+
+    .feature h3 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .feature p {
+      margin: 0;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 56px;
+    }
+
+    .btn {
+      padding: 14px 22px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: 1px solid var(--accent);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.85;
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--accent);
+    }
+
+    .btn-outline:hover {
+      background: #f7f7f7;
+    }
+
+    footer {
+      text-align: center;
+      padding: 32px 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 600px) {
+      header {
+        margin-bottom: 40px;
+      }
+
+      .hero-image {
+        margin: 40px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+
+    <header>
+      <h1>FyLink</h1>
+      <p>by Fyrus Photography</p>
+    </header>
+
+    <div class="hero-image">
+      <!-- Ganti src dengan gambar photography anda -->
+      <img src="hero.jpg" alt="FyLink Event Photography" />
+    </div>
+
+    <section class="content">
+      <h2>Real‑Time Event Photo Upload</h2>
+      <p>
+        FyLink ialah aplikasi untuk upload gambar event secara real‑time terus ke storage pilihan anda. 
+        Direka khas untuk workflow photographer moden — pantas, fleksibel dan stabil walaupun offline.
+      </p>
+
+      <div class="features">
+        <div class="feature">
+          <h3>Multi Storage Support</h3>
+          <p>Google Drive, OneDrive, Dropbox, S3‑compatible dan Local Storage (offline).</p>
+        </div>
+
+        <div class="feature">
+          <h3>Smart Image Size</h3>
+          <p>Pilihan upload 2048px, 1080px atau kualiti penuh 300 DPI.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Watermark Control</h3>
+          <p>Tambah watermark teks atau logo imej secara automatik.</p>
+        </div>
+
+        <div class="feature">
+          <h3>Event‑Ready Workflow</h3>
+          <p>Direka untuk kelajuan, konsisten dan penggunaan lapangan.</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a href="#" class="btn btn-primary">Download App</a>
+        <a href="https://www.facebook.com/" target="_blank" class="btn btn-outline">Contact on Facebook</a>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    © FyLink · Fyrus Photography
+  </footer>
+
+</body>
+</html>
