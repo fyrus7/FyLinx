@@ -1,2 +1,2 @@
-# FyLink
-FyLink app
+# FyLinx
+FyLinx app
