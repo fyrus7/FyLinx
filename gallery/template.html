@@ -96,21 +96,35 @@ const PAGE_SIZE = 20;
 let nextPageToken = null;
 
 async function loadImages(){
-  let url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents+and+mimeType+contains+'image/'&orderBy=modifiedTime desc&pageSize=${PAGE_SIZE}&fields=nextPageToken,files(id,name)`;
+  const query = encodeURIComponent(
+    `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
+  );
 
-  if(nextPageToken) url += `&pageToken=${nextPageToken}`;
+  let url =
+    `https://www.googleapis.com/drive/v3/files?` +
+    `q=${query}` +
+    `&orderBy=modifiedTime desc` +
+    `&pageSize=${PAGE_SIZE}` +
+    `&fields=nextPageToken,files(id,name)` +
+    `&key=${API_KEY}`;
 
-  url += `&key=${API_KEY}`;
+  if (nextPageToken) {
+    url += `&pageToken=${nextPageToken}`;
+  }
 
   const res = await fetch(url);
   const data = await res.json();
+
+  console.log(data); // DEBUG
 
   nextPageToken = data.nextPageToken || null;
 
   data.files.forEach(file=>{
     const img = document.createElement("img");
-    img.src = `https://drive.google.com/uc?id=${file.id}`;
-    img.onclick = ()=>openModal(img.src);
+    img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
+    img.onclick = ()=>openModal(
+      `https://drive.google.com/uc?id=${file.id}`
+    );
     gallery.appendChild(img);
   });
 }
@@ -121,12 +135,12 @@ function openModal(src){
 }
 
 modal.onclick = ()=> modal.style.display="none";
-
 syncBtn.onclick = loadImages;
 
-// Initial load (first 20)
+// first load
 loadImages();
 </script>
+
 
 </body>
 </html>
