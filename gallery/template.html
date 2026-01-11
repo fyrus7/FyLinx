@@ -150,7 +150,7 @@ async function loadNextImages() {
 
   nextPageToken = data.nextPageToken || null;
 
-  data.files.forEach(file => addImage(file, false)); // append bawah
+  data.files.reverse().forEach(file => addImage(file, false)); // append bawah
 }
 
 // ------------------- Add image to gallery -------------------
