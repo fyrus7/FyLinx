@@ -3,247 +3,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FyLinx – Real‑Time Photo Upload</title>
+  <title>FyLinx Gallery – Live Event Photos</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
   <style>
-    :root {
-      --text-main: #111;
-      --text-muted: #666;
-      --accent: #000;
-      --border-soft: #eaeaea;
+    :root{
+      --text-main:#111;
+      --text-muted:#666;
+      --accent:#000;
+      --border-soft:#eaeaea;
     }
 
-    * {
-      box-sizing: border-box;
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family:'Inter',sans-serif;
+      background:#fff;
+      color:var(--text-main);
+      line-height:1.6;
     }
 
-    body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      color: var(--text-main);
-      background: #fff;
-      line-height: 1.6;
+    .container{
+      max-width:1100px;
+      margin:auto;
+      padding:48px 24px;
     }
 
-    .container {
-      max-width: 1100px;
-      margin: auto;
-      padding: 48px 24px;
+    header{
+      text-align:center;
+      margin-bottom:56px;
     }
 
-    header {
-      text-align: center;
-      margin-bottom: 56px;
+    header h1{
+      font-size:clamp(40px,6vw,72px);
+      margin:0;
+      font-weight:700;
+      letter-spacing:-1px;
     }
 
-    header h1 {
-      font-size: clamp(40px, 6vw, 72px);
-      margin: 0;
-      font-weight: 700;
-      letter-spacing: -1px;
+    header p{
+      margin-top:6px;
+      font-size:14px;
+      color:var(--text-muted);
     }
 
-    header p {
-      margin-top: 8px;
-      font-size: 16px;
-      color: var(--text-muted);
+    .hero-image{
+      margin:56px 0;
     }
 
-    .hero-image {
-      width: 100%;
-      margin: 56px 0;
+    .hero-image img{
+      width:100%;
+      border-radius:14px;
+      display:block;
+      object-fit:cover;
     }
 
-    .hero-image img {
-      width: 100%;
-      border-radius: 14px;
-      display: block;
-      object-fit: cover;
+    .content{
+      max-width:760px;
+      margin:auto;
+      text-align:center;
     }
 
-    .content {
-      max-width: 760px;
-      margin: auto;
-      text-align: center;
+    .content h2{
+      font-size:28px;
+      font-weight:600;
+      margin-bottom:16px;
     }
 
-    .content h2 {
-      font-size: 28px;
-      font-weight: 600;
-      margin-bottom: 16px;
+    .content p{
+      font-size:16px;
+      color:var(--text-muted);
+      margin-bottom:32px;
     }
 
-    .content p {
-      font-size: 16px;
-      color: var(--text-muted);
-      margin-bottom: 32px;
+    .features{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:24px;
+      margin:48px 0;
+      text-align:left;
     }
 
-    .features {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 24px;
-      margin: 48px 0;
-      text-align: left;
+    .feature{
+      border:1px solid var(--border-soft);
+      border-radius:12px;
+      padding:20px 22px;
     }
 
-    .feature {
-      border: 1px solid var(--border-soft);
-      border-radius: 12px;
-      padding: 20px 22px;
+    .feature h3{
+      margin:0 0 6px;
+      font-size:15px;
+      font-weight:600;
     }
 
-    .feature h3 {
-      margin: 0 0 6px;
-      font-size: 15px;
-      font-weight: 600;
+    .feature p{
+      margin:0;
+      font-size:14px;
+      color:var(--text-muted);
     }
 
-    .feature p {
-      margin: 0;
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-/*
-    .actions {
-      display: flex;
-      justify-content: center;
-      gap: 16px;
-      flex-wrap: wrap;
-      margin-top: 56px;
-    }
-*/
-    .actions {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
+    .actions{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:16px;
+      margin-top:56px;
     }
 
-
-    .btn {
-      padding: 14px 22px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      border: 1px solid var(--accent);
+    .btn{
+      padding:14px 26px;
+      border-radius:999px;
+      font-size:14px;
+      font-weight:600;
+      text-decoration:none;
+      border:1px solid var(--accent);
+      transition:all .2s ease;
     }
 
-    .btn-primary {
-      background: var(--accent);
-      color: #fff;
+    .btn-primary{
+      background:var(--accent);
+      color:#fff;
     }
 
-    .btn-primary:hover {
-      opacity: 0.85;
+    .btn-primary:hover{ opacity:.85; }
+
+    footer{
+      text-align:center;
+      padding:32px 16px;
+      font-size:13px;
+      color:var(--text-muted);
     }
 
-    .btn-outline {
-      background: #fff;
-      color: var(--accent);
-    }
-
-    .btn-outline:hover {
-      background: #f7f7f7;
-    }
-
-    footer {
-      text-align: center;
-      padding: 32px 16px;
-      font-size: 13px;
-      color: var(--text-muted);
-    }
-
-    @media (max-width: 600px) {
-      header {
-        margin-bottom: 40px;
-      }
-
-      .hero-image {
-        margin: 40px 0;
-      }
+    @media(max-width:600px){
+      .hero-image{ margin:40px 0; }
     }
   </style>
 </head>
+
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <header>
-      <h1>FyLinx</h1>
-      <p>by Fyrus Photography</p>
-      <p style="margin-top:6px;color:#888;font-size:14px;">
-  Timeless moments, delivered instantly.
-</p>
-    </header>
+<header>
+  <h1>FyLinx Gallery</h1>
+  <p>Live event photos · Delivered instantly</p>
+</header>
 
-    <div class="hero-image">
-      <!-- Ganti src dengan gambar photography anda -->
-      <img src="https://raw.githubusercontent.com/fyrus7/FyLink/main/FyLink.png" alt="FyLink Event Photography" />
-    </div>
+<div class="hero-image">
+  <img src="https://raw.githubusercontent.com/fyrus7/FyLink/main/FyLink.png"
+       alt="FyLinx Live Event Gallery">
+</div>
 
-    <section class="content">
-  <h2>Instant Photo Delivery for Live Events</h2>
+<section class="content">
+  <h2>Your Event Photos, While the Moment Is Happening</h2>
+
   <p>
-    FyLinx is a refined photo delivery solution crafted for professional photographers.
-    It enables seamless real-time uploads and instant delivery, ensuring your images
-    reach clients and guests while the moment is still fresh.
+    FyLinx Gallery allows guests and clients to view professionally captured photos
+    in real time—directly from the event.
+    No waiting, no downloads, no hassle.
   </p>
 
   <div class="features">
     <div class="feature">
-      <h3>Seamless Storage Integration</h3>
+      <h3>Live Upload During Events</h3>
       <p>
-        Connect effortlessly to Google Drive, OneDrive, Dropbox, S3-compatible storage,
-        or Local Storage for complete control—online or offline.
+        Photos appear in the gallery moments after they are taken,
+        keeping excitement alive throughout the event.
       </p>
     </div>
 
     <div class="feature">
-      <h3>Precision Image Output</h3>
+      <h3>No App Required</h3>
       <p>
-        Deliver images exactly as intended, with selectable resolutions including
-        2048px, 1080px, or uncompromised 300 DPI quality for print.
+        Guests simply open a link on their phone—no installation,
+        no login, no technical steps.
       </p>
     </div>
 
     <div class="feature">
-      <h3>Elegant Watermarking</h3>
+      <h3>Clean, Elegant Gallery</h3>
       <p>
-        Apply subtle text or logo watermarks automatically, preserving authorship
-        without distracting from the image.
+        A distraction-free viewing experience designed to showcase
+        professional photography beautifully.
       </p>
     </div>
 
     <div class="feature">
-      <h3>Designed for On-Site Workflow</h3>
+      <h3>Perfect for Weddings & Corporate Events</h3>
       <p>
-        Optimized for use with Windows-compatible tablets, FyLinx offers a mobile,
-        professional workflow for live events, exhibitions, and corporate functions.
+        Ideal for weddings, exhibitions, launches, and live functions
+        where instant photo access matters.
       </p>
     </div>
   </div>
 
   <div class="actions">
-    <a href="https://github.com/fyrus7/FyLink/releases/download/v1.0/FyLink.zip" class="btn btn-primary">
-      Download FyLinx
-    </a>
-    <a href="https://www.facebook.com/iamfyrus" target="_blank" class="btn btn-outline">
-      Contact on Facebook
+    <!-- GANTI nombor WhatsApp -->
+    <a href="https://wa.me/60123456789?text=Hi%20FyLinx,%20I%20would%20like%20to%20know%20more%20about%20live%20event%20gallery."
+       class="btn btn-primary">
+      Contact via WhatsApp
     </a>
   </div>
 </section>
 
+</div>
 
-  </div>
-
-  <footer>
+<footer>
   © <span id="year"></span> · FyLinx · Fyrus Photography
 </footer>
 
-  <script>
+<script>
   document.getElementById("year").textContent = new Date().getFullYear();
 </script>
 
