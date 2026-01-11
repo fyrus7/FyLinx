@@ -38,15 +38,21 @@ button{
 .gallery{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  grid-auto-rows:160px;
   gap:6px;
   padding:8px;
 }
 
 .gallery img{
   width:100%;
-  height:auto;
-  object-fit:contain;
-  background:#000;
+  height:100%;
+  object-fit:cover;
+  cursor:pointer;
+}
+
+/* Landscape image */
+.gallery img.landscape{
+  grid-column:span 2;
 }
 
 footer{
@@ -103,12 +109,12 @@ async function loadImages(){
   let url =
     `https://www.googleapis.com/drive/v3/files?` +
     `q=${query}` +
-    `&orderBy=modifiedTime desc` +
+    `&orderBy=createdTime desc` +
     `&pageSize=${PAGE_SIZE}` +
     `&fields=nextPageToken,files(id,name)` +
     `&key=${API_KEY}`;
 
-  if (nextPageToken) {
+  if(nextPageToken){
     url += `&pageToken=${nextPageToken}`;
   }
 
@@ -119,14 +125,18 @@ async function loadImages(){
 
   data.files.forEach(file=>{
     const img = document.createElement("img");
-
-    // Thumbnail (fast & public)
     img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
 
-    // Modal full image
+    img.onload = ()=>{
+      if(img.naturalWidth > img.naturalHeight){
+        img.classList.add("landscape");
+      }
+    };
+
     img.onclick = ()=>openModal(file.id);
 
-    gallery.appendChild(img);
+    // 🔥 NEW IMAGE MASUK ATAS
+    gallery.prepend(img);
   });
 }
 
