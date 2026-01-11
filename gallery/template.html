@@ -44,9 +44,9 @@ button{
 
 .gallery img{
   width:100%;
-  aspect-ratio:1/1;
-  object-fit:cover;
-  cursor:pointer;
+  height:auto;
+  object-fit:contain;
+  background:#000;
 }
 
 footer{
@@ -115,22 +115,23 @@ async function loadImages(){
   const res = await fetch(url);
   const data = await res.json();
 
-  console.log(data); // DEBUG
-
   nextPageToken = data.nextPageToken || null;
 
   data.files.forEach(file=>{
     const img = document.createElement("img");
+
+    // Thumbnail (fast & public)
     img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w1000`;
-    img.onclick = ()=>openModal(
-      `https://drive.google.com/uc?id=${file.id}`
-    );
+
+    // Modal full image
+    img.onclick = ()=>openModal(file.id);
+
     gallery.appendChild(img);
   });
 }
 
-function openModal(src){
-  modalImg.src = src;
+function openModal(fileId){
+  modalImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
   modal.style.display = "flex";
 }
 
@@ -140,7 +141,6 @@ syncBtn.onclick = loadImages;
 // first load
 loadImages();
 </script>
-
 
 </body>
 </html>
