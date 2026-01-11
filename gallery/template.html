@@ -150,14 +150,14 @@ async function loadNextImages(isInitial = false) {
 
   nextPageToken = data.nextPageToken || null;
 
-  data.files.forEach(file => addImage(file, isInitial));
+  data.files.forEach(file => addImage(file));
 }
 
 // ------------------- Add image to gallery -------------------
-function addImage(file, prepend = false){
+function addImage(file){
   if(document.querySelector(`#img-${file.id}`)) return;
 
-  modalImageIds.push(file.id); // untuk modal
+  modalImageIds.push(file.id); // ikut urutan sebenar API
 
   const img = document.createElement("img");
   img.id = `img-${file.id}`;
@@ -173,11 +173,7 @@ function addImage(file, prepend = false){
 
   img.onclick = ()=>openModal(file.id);
 
-  if(prepend){
-    gallery.prepend(img); // first batch: newest atas
-  } else {
-    gallery.appendChild(img); // MORE: older gambar bawah
-  }
+  gallery.appendChild(img); // SENTIASA append
 }
 
 // ------------------- Modal popup -------------------
