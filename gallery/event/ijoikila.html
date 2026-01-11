@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FyLinx Gallery</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui, sans-serif;
+  background:#111;
+  color:#fff;
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+}
+
+header h1{
+  font-size:14px;
+  margin:0;
+  letter-spacing:1px;
+}
+
+button{
+  background:#fff;
+  color:#000;
+  border:0;
+  padding:6px 14px;
+  font-size:12px;
+  cursor:pointer;
+}
+
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  grid-auto-rows:110px; /* default mobile */
+  gap:8px;
+  padding:8px;
+}
+
+@media(min-width:768px){ /* desktop */
+  .gallery{
+    grid-auto-rows:120px;
+  }
+}
+
+.gallery img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  cursor:pointer;
+}
+
+/* Landscape → lebar + lebih tinggi */
+.gallery img.landscape{
+  grid-column:span 2;   /* lebar 2 column */
+  grid-row:span 2;      /* tinggi 2 row */
+}
+
+/* Portrait → tinggi 2 row */
+.gallery img.portrait{
+  grid-row:span 2;
+}
+
+footer{
+  text-align:center;
+  font-size:11px;
+  padding:12px;
+  opacity:.5;
+}
+
+/* Modal */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal img{
+  max-width:95%;
+  max-height:95%;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>FyLinx</h1>
+  <span style="font-size:12px; color:#fff; margin-left: auto;">wedding gallery</span>
+</header>
+
+<div class="gallery" id="gallery"></div>
+
+<footer>© FyLinx</footer>
+
+<div class="modal" id="modal">
+  <img id="modalImg">
+</div>
+
+<script>
+const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
+const FOLDER_ID = "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE";
+const PAGE_SIZE = 20;
+
+let nextPageToken = null;
+const gallery = document.getElementById("gallery");
+const modal = document.getElementById("modal");
+const modalImg = document.getElementById("modalImg");
+
+let modalImageIds = [];
+let currentIndex = 0;
+
+// ------------------- MORE button -------------------
+const moreBtn = document.createElement("button");
+moreBtn.textContent = "MORE";
+moreBtn.style.display = "block";
+moreBtn.style.margin = "16px auto";
+moreBtn.style.padding = "8px 16px";
+moreBtn.style.fontSize = "12px";
+gallery.after(moreBtn);
+
+// ------------------- util: extract number from filename -------------------
+function extractNumber(name){
+  // ambil nombor terakhir dalam nama (IMG_2024_2001.jpg → 2001)
+  const matches = name.match(/\d+/g);
+  return matches ? parseInt(matches[matches.length - 1], 10) : 0;
+}
+
+// ------------------- Load images -------------------
+async function loadNextImages(){
+  const query = encodeURIComponent(
+    `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
+  );
+
+  let url =
+    `https://www.googleapis.com/drive/v3/files?` +
+    `q=${query}` +
+    `&orderBy=name desc` + // paging stabil
+    `&pageSize=${PAGE_SIZE}` +
+    `&fields=nextPageToken,files(id,name)` +
+    `&key=${API_KEY}`;
+
+  if (nextPageToken) url += `&pageToken=${nextPageToken}`;
+
+  const res = await fetch(url);
+  const data = await res.json();
+
+  nextPageToken = data.nextPageToken || null;
+
+  // 🔥 NATURAL SORT ikut nombor dalam nama (Z–A)
+  data.files
+    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name))
+    .forEach(file => addImage(file));
+}
+
+// ------------------- Add image -------------------
+function addImage(file){
+  if(document.getElementById(`img-${file.id}`)) return;
+
+  modalImageIds.push(file.id);
+
+  const img = document.createElement("img");
+  img.id = `img-${file.id}`;
+  img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
+
+  img.onload = ()=>{
+    if(img.naturalWidth > img.naturalHeight){
+      img.classList.add("landscape");
+    } else {
+      img.classList.add("portrait");
+    }
+  };
+
+  img.onclick = ()=>openModal(file.id);
+  gallery.appendChild(img);
+}
+
+// ------------------- Modal -------------------
+function openModal(fileId){
+  currentIndex = modalImageIds.indexOf(fileId);
+  modalImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
+  modal.style.display = "flex";
+}
+
+modal.onclick = e=>{
+  if(e.target === modal) modal.style.display = "none";
+};
+
+document.addEventListener("keydown", e=>{
+  if(modal.style.display !== "flex") return;
+
+  if(e.key === "ArrowRight"){
+    currentIndex = (currentIndex + 1) % modalImageIds.length;
+  }
+  if(e.key === "ArrowLeft"){
+    currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
+  }
+  if(e.key === "Escape"){
+    modal.style.display = "none";
+    return;
+  }
+
+  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
+});
+
+// ------------------- Init -------------------
+moreBtn.onclick = loadNextImages;
+loadNextImages();
+</script>
+
+
+</body>
+</html>
