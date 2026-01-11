@@ -109,7 +109,7 @@ footer{
 <script>
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 const FOLDER_ID = "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE";
-const PAGE_SIZE = 20; // 20 gambar per batch
+const PAGE_SIZE = 20;
 
 let nextPageToken = null;
 const gallery = document.getElementById("gallery");
@@ -119,18 +119,24 @@ const modalImg = document.getElementById("modalImg");
 let modalImageIds = [];
 let currentIndex = 0;
 
-// ------------------- Create MORE button -------------------
+// ------------------- MORE button -------------------
 const moreBtn = document.createElement("button");
 moreBtn.textContent = "MORE";
 moreBtn.style.display = "block";
 moreBtn.style.margin = "16px auto";
-moreBtn.style.cursor = "pointer";
 moreBtn.style.padding = "8px 16px";
 moreBtn.style.fontSize = "12px";
 gallery.after(moreBtn);
 
-// ------------------- Load batch of images -------------------
-async function loadNextImages(isInitial = false) {
+// ------------------- util: extract number from filename -------------------
+function extractNumber(name){
+  // ambil nombor terakhir dalam nama (IMG_2024_2001.jpg → 2001)
+  const matches = name.match(/\d+/g);
+  return matches ? parseInt(matches[matches.length - 1], 10) : 0;
+}
+
+// ------------------- Load images -------------------
+async function loadNextImages(){
   const query = encodeURIComponent(
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
   );
@@ -138,7 +144,7 @@ async function loadNextImages(isInitial = false) {
   let url =
     `https://www.googleapis.com/drive/v3/files?` +
     `q=${query}` +
-    `&orderBy=createdTime desc` +
+    `&orderBy=name desc` + // paging stabil
     `&pageSize=${PAGE_SIZE}` +
     `&fields=nextPageToken,files(id,name)` +
     `&key=${API_KEY}`;
@@ -150,14 +156,17 @@ async function loadNextImages(isInitial = false) {
 
   nextPageToken = data.nextPageToken || null;
 
-  data.files.forEach(file => addImage(file));
+  // 🔥 NATURAL SORT ikut nombor dalam nama (Z–A)
+  data.files
+    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name))
+    .forEach(file => addImage(file));
 }
 
-// ------------------- Add image to gallery -------------------
+// ------------------- Add image -------------------
 function addImage(file){
-  if(document.querySelector(`#img-${file.id}`)) return;
+  if(document.getElementById(`img-${file.id}`)) return;
 
-  modalImageIds.push(file.id); // ikut urutan sebenar API
+  modalImageIds.push(file.id);
 
   const img = document.createElement("img");
   img.id = `img-${file.id}`;
@@ -172,45 +181,42 @@ function addImage(file){
   };
 
   img.onclick = ()=>openModal(file.id);
-
-  gallery.appendChild(img); // SENTIASA append
+  gallery.appendChild(img);
 }
 
-// ------------------- Modal popup -------------------
+// ------------------- Modal -------------------
 function openModal(fileId){
   currentIndex = modalImageIds.indexOf(fileId);
   modalImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
   modal.style.display = "flex";
 }
 
-// Close modal on click outside image
-modal.onclick = (e)=>{
-  if(e.target === modal) modal.style.display="none";
-}
+modal.onclick = e=>{
+  if(e.target === modal) modal.style.display = "none";
+};
 
-// Modal left/right navigation
 document.addEventListener("keydown", e=>{
   if(modal.style.display !== "flex") return;
 
   if(e.key === "ArrowRight"){
     currentIndex = (currentIndex + 1) % modalImageIds.length;
-    modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
   }
   if(e.key === "ArrowLeft"){
     currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
-    modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
   }
   if(e.key === "Escape"){
     modal.style.display = "none";
+    return;
   }
+
+  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
 });
 
-// ------------------- MORE button -------------------
-moreBtn.onclick = ()=> loadNextImages(false);
-
-// ------------------- Initial load 20 gambar terbaru -------------------
-loadNextImages(true);
+// ------------------- Init -------------------
+moreBtn.onclick = loadNextImages;
+loadNextImages();
 </script>
+
 
 </body>
 </html>
