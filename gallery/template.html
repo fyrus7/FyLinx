@@ -109,7 +109,7 @@ footer{
 <script>
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 const FOLDER_ID = "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE";
-const PAGE_SIZE = 20; // load 20 per batch
+const PAGE_SIZE = 20; // 20 gambar per batch
 
 let nextPageToken = null;
 const gallery = document.getElementById("gallery");
@@ -129,8 +129,8 @@ moreBtn.style.padding = "8px 16px";
 moreBtn.style.fontSize = "12px";
 gallery.after(moreBtn);
 
-// ------------------- Load next batch of images -------------------
-async function loadNextImages() {
+// ------------------- Load batch of images -------------------
+async function loadNextImages(isInitial = false) {
   const query = encodeURIComponent(
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
   );
@@ -150,14 +150,14 @@ async function loadNextImages() {
 
   nextPageToken = data.nextPageToken || null;
 
-  data.files.reverse().forEach(file => addImage(file, false)); // append bawah
+  data.files.forEach(file => addImage(file, isInitial));
 }
 
 // ------------------- Add image to gallery -------------------
 function addImage(file, prepend = false){
   if(document.querySelector(`#img-${file.id}`)) return;
 
-  modalImageIds.push(file.id); // newest last in modal array
+  modalImageIds.push(file.id); // untuk modal
 
   const img = document.createElement("img");
   img.id = `img-${file.id}`;
@@ -174,9 +174,9 @@ function addImage(file, prepend = false){
   img.onclick = ()=>openModal(file.id);
 
   if(prepend){
-    gallery.prepend(img);
+    gallery.prepend(img); // first batch: newest atas
   } else {
-    gallery.appendChild(img);
+    gallery.appendChild(img); // MORE: older gambar bawah
   }
 }
 
@@ -210,10 +210,10 @@ document.addEventListener("keydown", e=>{
 });
 
 // ------------------- MORE button -------------------
-moreBtn.onclick = loadNextImages;
+moreBtn.onclick = ()=> loadNextImages(false);
 
-// ------------------- Initial load 20 images -------------------
-loadNextImages();
+// ------------------- Initial load 20 gambar terbaru -------------------
+loadNextImages(true);
 </script>
 
 </body>
