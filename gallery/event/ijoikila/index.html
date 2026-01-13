@@ -92,6 +92,12 @@ footer{
 .modal img{
   max-width:96%;
   max-height:96%;
+  transition: transform .25s ease, opacity .25s ease;
+  will-change: transform;
+}
+
+body.modal-open{
+  overflow:hidden;
 }
 
 /* ================= SENTINEL ================= */
@@ -211,10 +217,14 @@ function openModal(id){
   currentIndex = modalImageIds.indexOf(id);
   modalImg.src = `https://lh3.googleusercontent.com/d/${id}`;
   modal.style.display = "flex";
+  document.body.classList.add("modal-open");
 }
 
 modal.onclick = e=>{
-  if(e.target === modal) modal.style.display = "none";
+  if(e.target === modal){
+    modal.style.display = "none";
+    document.body.classList.remove("modal-open");
+  }
 };
 
 document.addEventListener("keydown", e=>{
@@ -235,32 +245,66 @@ document.addEventListener("keydown", e=>{
 
   /* ================= MOBILE SWIPE ================= */
 let startX = 0;
-let endX   = 0;
-const SWIPE_THRESHOLD = 50;
+let currentX = 0;
+let isSwiping = false;
+const SWIPE_THRESHOLD = 60;
 
 modal.addEventListener("touchstart", e=>{
   startX = e.touches[0].clientX;
+  isSwiping = true;
+  modalImg.style.transition = "none";
 },{ passive:true });
 
 modal.addEventListener("touchmove", e=>{
-  endX = e.touches[0].clientX;
+  if(!isSwiping) return;
+  currentX = e.touches[0].clientX;
+  const delta = currentX - startX;
+
+  // ikut jari
+  modalImg.style.transform = `translateX(${delta}px)`;
 },{ passive:true });
 
 modal.addEventListener("touchend", ()=>{
-  const diff = endX - startX;
+  if(!isSwiping) return;
+  isSwiping = false;
 
-  if(Math.abs(diff) < SWIPE_THRESHOLD) return;
+  const delta = currentX - startX;
+  modalImg.style.transition = "transform .25s ease, opacity .25s ease";
 
-  if(diff < 0){
-    // swipe left → next
-    currentIndex = (currentIndex + 1) % modalImageIds.length;
-  }else{
-    // swipe right → prev
-    currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
+  if(Math.abs(delta) < SWIPE_THRESHOLD){
+    // snap balik
+    modalImg.style.transform = "translateX(0)";
+    return;
   }
 
-  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
+  const direction = delta < 0 ? 1 : -1;
+
+  // slide keluar
+  modalImg.style.transform = `translateX(${direction * -100}%)`;
+  modalImg.style.opacity = "0";
+
+  setTimeout(()=>{
+    // tukar image
+    if(delta < 0){
+      currentIndex = (currentIndex + 1) % modalImageIds.length;
+    }else{
+      currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
+    }
+
+    modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
+
+    // reset posisi dari arah bertentangan
+    modalImg.style.transition = "none";
+    modalImg.style.transform = `translateX(${direction * 100}%)`;
+
+    requestAnimationFrame(()=>{
+      modalImg.style.transition = "transform .25s ease, opacity .25s ease";
+      modalImg.style.opacity = "1";
+      modalImg.style.transform = "translateX(0)";
+    });
+  }, 200);
 });
+
 
 /* ================= INFINITE SCROLL ================= */
 const observer = new IntersectionObserver(entries=>{
