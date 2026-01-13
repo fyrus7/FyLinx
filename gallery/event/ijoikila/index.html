@@ -233,6 +233,35 @@ document.addEventListener("keydown", e=>{
   modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
 });
 
+  /* ================= MOBILE SWIPE ================= */
+let startX = 0;
+let endX   = 0;
+const SWIPE_THRESHOLD = 50;
+
+modal.addEventListener("touchstart", e=>{
+  startX = e.touches[0].clientX;
+},{ passive:true });
+
+modal.addEventListener("touchmove", e=>{
+  endX = e.touches[0].clientX;
+},{ passive:true });
+
+modal.addEventListener("touchend", ()=>{
+  const diff = endX - startX;
+
+  if(Math.abs(diff) < SWIPE_THRESHOLD) return;
+
+  if(diff < 0){
+    // swipe left → next
+    currentIndex = (currentIndex + 1) % modalImageIds.length;
+  }else{
+    // swipe right → prev
+    currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
+  }
+
+  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
+});
+
 /* ================= INFINITE SCROLL ================= */
 const observer = new IntersectionObserver(entries=>{
   if(entries[0].isIntersecting && nextPageToken){
