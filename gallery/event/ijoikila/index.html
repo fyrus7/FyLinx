@@ -226,8 +226,16 @@ function addImage(file){
 /* ================= MODAL LOGIC ================= */
 function updateSlider(){
   const len=modalImageIds.length;
-  const prev=(currentIndex-1+len)%len;
-  const next=(currentIndex+1)%len;
+  const prev = currentIndex > 0 ? currentIndex - 1 : null;
+const next = currentIndex < len - 1 ? currentIndex + 1 : null;
+
+prevImg.src = prev !== null
+  ? `https://lh3.googleusercontent.com/d/${modalImageIds[prev]}`
+  : "";
+
+nextImg.src = next !== null
+  ? `https://lh3.googleusercontent.com/d/${modalImageIds[next]}`
+  : "";
 
   prevImg.src=`https://lh3.googleusercontent.com/d/${modalImageIds[prev]}`;
   currentImg.src=`https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
@@ -286,14 +294,31 @@ modal.addEventListener("touchmove",e=>{
 },{passive:true});
 
 modal.addEventListener("touchend",()=>{
+  // JIKA GERAK TERLALU SIKIT → ANGAP TAP, JANGAN BUAT APA-APA
+if (Math.abs(deltaX) < 10) {
+  slider.style.transition = "transform .25s ease";
+  slider.style.transform = "translateX(-100%)";
+  return;
+}
   if(!swiping) return;
   swiping=false;
 
-  slider.style.transition="transform .25s ease";
+  slider.style.transition = "transform .35s cubic-bezier(.22,.61,.36,1)";
 
-  if(Math.abs(deltaX)>THRESHOLD){
-    currentIndex += deltaX<0 ? 1 : -1;
+  if (Math.abs(deltaX) > THRESHOLD) {
+  if (deltaX < 0 && currentIndex < modalImageIds.length - 1) {
+    currentIndex++;
+  } 
+  else if (deltaX > 0 && currentIndex > 0) {
+    currentIndex--;
+  } 
+  else {
+    // HUJUNG → BOUNCE BALIK
+    slider.style.transform = "translateX(-100%)";
+    return;
   }
+}
+
   currentIndex=(currentIndex+modalImageIds.length)%modalImageIds.length;
   updateSlider();
 });
