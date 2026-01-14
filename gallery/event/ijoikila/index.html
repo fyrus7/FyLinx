@@ -82,9 +82,11 @@ footer{
   inset:0;
   background:rgba(0,0,0,.92);
   display:none;
-  overflow:hidden;
+  justify-content:center;
+  align-items:center;
   z-index:10;
 }
+
 
 .slider{
   display:flex;
@@ -238,7 +240,7 @@ function updateSlider(){
 function openModalByIndex(i){
   currentIndex=i;
   updateSlider();
-  modal.style.display="block";
+  modal.style.display="flex";
   document.body.classList.add("modal-open");
 }
 
