@@ -9,7 +9,7 @@
 /* ================= BASE ================= */
 body{
   margin:0;
-  font-family:system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
   background:#fff;
   color:#111;
 }
@@ -37,25 +37,24 @@ header span{
 /* ================= GALLERY ================= */
 .gallery{
   display:grid;
-  grid-template-columns:repeat(3,1fr); /* mobile */
+  grid-template-columns:repeat(3,1fr);
   gap:4px;
   padding:6px;
 }
 
 @media(min-width:600px){
-  .gallery{ grid-template-columns:repeat(4,1fr); }
+  .gallery{grid-template-columns:repeat(4,1fr);}
 }
-
 @media(min-width:1024px){
-  .gallery{ grid-template-columns:repeat(6,1fr); }
+  .gallery{grid-template-columns:repeat(6,1fr);}
 }
 
-/* ================= IMAGE ================= */
 .gallery img,
 .skeleton{
   width:100%;
   aspect-ratio:1/1;
   border-radius:4px;
+  object-fit:cover;
 }
 
 /* ================= SKELETON ================= */
@@ -63,7 +62,6 @@ header span{
   background:#eee;
   animation:pulse 1.4s ease-in-out infinite;
 }
-
 @keyframes pulse{
   0%{opacity:.6}
   50%{opacity:1}
@@ -84,16 +82,25 @@ footer{
   inset:0;
   background:rgba(0,0,0,.92);
   display:none;
-  justify-content:center;
-  align-items:center;
+  overflow:hidden;
   z-index:10;
 }
 
-.modal img{
-  max-width:96%;
-  max-height:96%;
-  transition: transform .25s ease, opacity .25s ease;
-  will-change: transform;
+.slider{
+  display:flex;
+  width:300%;
+  height:100%;
+  transform:translateX(-100%);
+  transition:transform .25s ease;
+}
+
+.slider img{
+  width:100%;
+  max-width:100vw;
+  max-height:100vh;
+  margin:auto;
+  object-fit:contain;
+  pointer-events:auto;
 }
 
 body.modal-open{
@@ -101,9 +108,7 @@ body.modal-open{
 }
 
 /* ================= SENTINEL ================= */
-#sentinel{
-  height:1px;
-}
+#sentinel{height:1px}
 </style>
 </head>
 
@@ -119,8 +124,13 @@ body.modal-open{
 
 <footer>© FyLinx</footer>
 
+<!-- ================= MODAL ================= -->
 <div class="modal" id="modal">
-  <img id="modalImg">
+  <div class="slider" id="slider">
+    <img id="prevImg">
+    <img id="currentImg">
+    <img id="nextImg">
+  </div>
 </div>
 
 <script>
@@ -136,8 +146,12 @@ let loading = false;
 
 const gallery  = document.getElementById("gallery");
 const sentinel = document.getElementById("sentinel");
-const modal    = document.getElementById("modal");
-const modalImg = document.getElementById("modalImg");
+
+const modal = document.getElementById("modal");
+const slider = document.getElementById("slider");
+const prevImg = document.getElementById("prevImg");
+const currentImg = document.getElementById("currentImg");
+const nextImg = document.getElementById("nextImg");
 
 let modalImageIds = [];
 let currentIndex = 0;
@@ -145,173 +159,149 @@ let currentIndex = 0;
 /* ================= UTIL ================= */
 function extractNumber(name){
   const m = name.match(/\d+/g);
-  return m ? parseInt(m[m.length - 1], 10) : 0;
+  return m ? parseInt(m[m.length-1],10) : 0;
 }
 
 /* ================= SKELETON ================= */
 function showSkeleton(){
   for(let i=0;i<SKELETON_COUNT;i++){
-    const sk = document.createElement("div");
-    sk.className = "skeleton";
+    const sk=document.createElement("div");
+    sk.className="skeleton";
     gallery.appendChild(sk);
   }
 }
-
 function removeSkeleton(){
   document.querySelectorAll(".skeleton").forEach(s=>s.remove());
 }
 
-/* ================= LOAD IMAGES ================= */
+/* ================= LOAD ================= */
 async function loadNextImages(){
   if(loading) return;
-  loading = true;
+  loading=true;
   showSkeleton();
 
-  const query = encodeURIComponent(
+  const query=encodeURIComponent(
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
   );
 
-  let url =
-    `https://www.googleapis.com/drive/v3/files?` +
-    `q=${query}` +
-    `&orderBy=name desc` +
-    `&pageSize=${PAGE_SIZE}` +
-    `&fields=nextPageToken,files(id,name)` +
+  let url=
+    `https://www.googleapis.com/drive/v3/files?`+
+    `q=${query}`+
+    `&orderBy=name desc`+
+    `&pageSize=${PAGE_SIZE}`+
+    `&fields=nextPageToken,files(id,name)`+
     `&key=${API_KEY}`;
 
-  if(nextPageToken) url += `&pageToken=${nextPageToken}`;
+  if(nextPageToken) url+=`&pageToken=${nextPageToken}`;
 
-  const res  = await fetch(url);
-  const data = await res.json();
+  const res=await fetch(url);
+  const data=await res.json();
 
-  nextPageToken = data.nextPageToken || null;
-
+  nextPageToken=data.nextPageToken||null;
   removeSkeleton();
 
   data.files
     .sort((a,b)=>extractNumber(b.name)-extractNumber(a.name))
     .forEach(addImage);
 
-  loading = false;
+  loading=false;
 }
 
 /* ================= ADD IMAGE ================= */
 function addImage(file){
-  if(document.getElementById(`img-${file.id}`)) return;
+  if(document.getElementById("img-"+file.id)) return;
 
   modalImageIds.push(file.id);
 
-  const img = document.createElement("img");
-  img.id  = `img-${file.id}`;
-  img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
-  img.loading = "lazy";
-  img.style.objectFit = "cover";
-  img.style.cursor = "pointer";
-
-  img.onclick = ()=>openModal(file.id);
+  const img=document.createElement("img");
+  img.id="img-"+file.id;
+  img.src=`https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
+  img.loading="lazy";
+  img.onclick=()=>openModalByIndex(modalImageIds.length-1);
   gallery.appendChild(img);
 }
 
-/* ================= MODAL ================= */
-function openModal(id){
-  currentIndex = modalImageIds.indexOf(id);
-  modalImg.src = `https://lh3.googleusercontent.com/d/${id}`;
-  modal.style.display = "flex";
+/* ================= MODAL LOGIC ================= */
+function updateSlider(){
+  const len=modalImageIds.length;
+  const prev=(currentIndex-1+len)%len;
+  const next=(currentIndex+1)%len;
+
+  prevImg.src=`https://lh3.googleusercontent.com/d/${modalImageIds[prev]}`;
+  currentImg.src=`https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
+  nextImg.src=`https://lh3.googleusercontent.com/d/${modalImageIds[next]}`;
+
+  slider.style.transition="none";
+  slider.style.transform="translateX(-100%)";
+}
+
+function openModalByIndex(i){
+  currentIndex=i;
+  updateSlider();
+  modal.style.display="block";
   document.body.classList.add("modal-open");
 }
 
-modal.onclick = e=>{
-  if(e.target === modal){
-    modal.style.display = "none";
+/* ================= TAP BLACK AREA TO CLOSE ================= */
+slider.addEventListener("click",e=>e.stopPropagation());
+
+modal.addEventListener("pointerdown",e=>{
+  if(e.target===modal){
+    modal.style.display="none";
     document.body.classList.remove("modal-open");
   }
-};
-
-document.addEventListener("keydown", e=>{
-  if(modal.style.display !== "flex") return;
-
-  if(e.key === "ArrowRight"){
-    currentIndex = (currentIndex + 1) % modalImageIds.length;
-  }
-  if(e.key === "ArrowLeft"){
-    currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
-  }
-  if(e.key === "Escape"){
-    modal.style.display = "none";
-    return;
-  }
-  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
 });
 
-  /* ================= MOBILE SWIPE ================= */
-let startX = 0;
-let currentX = 0;
-let isSwiping = false;
-const SWIPE_THRESHOLD = 60;
+/* ================= KEYBOARD ================= */
+document.addEventListener("keydown",e=>{
+  if(modal.style.display!=="block") return;
 
-modal.addEventListener("touchstart", e=>{
-  startX = e.touches[0].clientX;
-  isSwiping = true;
-  modalImg.style.transition = "none";
-},{ passive:true });
-
-modal.addEventListener("touchmove", e=>{
-  if(!isSwiping) return;
-  currentX = e.touches[0].clientX;
-  const delta = currentX - startX;
-
-  // ikut jari
-  modalImg.style.transform = `translateX(${delta}px)`;
-},{ passive:true });
-
-modal.addEventListener("touchend", ()=>{
-  if(!isSwiping) return;
-  isSwiping = false;
-
-  const delta = currentX - startX;
-  modalImg.style.transition = "transform .25s ease, opacity .25s ease";
-
-  if(Math.abs(delta) < SWIPE_THRESHOLD){
-    // snap balik
-    modalImg.style.transform = "translateX(0)";
+  if(e.key==="ArrowRight") currentIndex++;
+  if(e.key==="ArrowLeft") currentIndex--;
+  if(e.key==="Escape"){
+    modal.style.display="none";
+    document.body.classList.remove("modal-open");
     return;
   }
-
-  const direction = delta < 0 ? 1 : -1;
-
-  // slide keluar
-  modalImg.style.transform = `translateX(${direction * -100}%)`;
-  modalImg.style.opacity = "0";
-
-  setTimeout(()=>{
-    // tukar image
-    if(delta < 0){
-      currentIndex = (currentIndex + 1) % modalImageIds.length;
-    }else{
-      currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
-    }
-
-    modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
-
-    // reset posisi dari arah bertentangan
-    modalImg.style.transition = "none";
-    modalImg.style.transform = `translateX(${direction * 100}%)`;
-
-    requestAnimationFrame(()=>{
-      modalImg.style.transition = "transform .25s ease, opacity .25s ease";
-      modalImg.style.opacity = "1";
-      modalImg.style.transform = "translateX(0)";
-    });
-  }, 200);
+  currentIndex=(currentIndex+modalImageIds.length)%modalImageIds.length;
+  updateSlider();
 });
 
+/* ================= REAL-TIME CONNECTED SWIPE ================= */
+let startX=0, deltaX=0, swiping=false;
+const THRESHOLD=60;
+
+modal.addEventListener("touchstart",e=>{
+  startX=e.touches[0].clientX;
+  swiping=true;
+  slider.style.transition="none";
+},{passive:true});
+
+modal.addEventListener("touchmove",e=>{
+  if(!swiping) return;
+  deltaX=e.touches[0].clientX-startX;
+  slider.style.transform=`translateX(calc(-100% + ${deltaX}px))`;
+},{passive:true});
+
+modal.addEventListener("touchend",()=>{
+  if(!swiping) return;
+  swiping=false;
+
+  slider.style.transition="transform .25s ease";
+
+  if(Math.abs(deltaX)>THRESHOLD){
+    currentIndex += deltaX<0 ? 1 : -1;
+  }
+  currentIndex=(currentIndex+modalImageIds.length)%modalImageIds.length;
+  updateSlider();
+});
 
 /* ================= INFINITE SCROLL ================= */
-const observer = new IntersectionObserver(entries=>{
-  if(entries[0].isIntersecting && nextPageToken){
+const observer=new IntersectionObserver(e=>{
+  if(e[0].isIntersecting && nextPageToken){
     loadNextImages();
   }
-},{ rootMargin:"300px" });
+},{rootMargin:"300px"});
 
 observer.observe(sentinel);
 
