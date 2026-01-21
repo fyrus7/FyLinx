@@ -13,7 +13,7 @@ body{
   color:#111;
 }
 
-/* HEADER */
+/* ===== HEADER ===== */
 header{
   position:sticky;
   top:0;
@@ -28,7 +28,7 @@ header{
 header h1{font-size:14px;margin:0}
 header span{font-size:12px;color:#777}
 
-/* GALLERY */
+/* ===== GALLERY ===== */
 .gallery{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -51,7 +51,7 @@ header span{font-size:12px;color:#777}
   height:1px;
 }
 
-/* MODAL */
+/* ===== MODAL (SINGLE IMAGE) ===== */
 .modal{
   position:fixed;
   inset:0;
@@ -59,40 +59,31 @@ header span{font-size:12px;color:#777}
   z-index:20;
 }
 
-/* BACKDROP */
-.backdrop{
+.modal-backdrop{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,.92);
-  z-index:1;
-  pointer-events:auto;
 }
 
-/* SLIDER */
-.slider{
-  position:relative;
+.modal-content{
+  position:absolute;
+  inset:0;
   display:flex;
-  width:300vw;
-  height:100%;
-  transform:translateX(-100vw);
-  transition:transform .35s cubic-bezier(.22,.61,.36,1);
-  z-index:2;
-}
-
-.slide{
-  width:100vw;
-  display:flex;
-  justify-content:center;
   align-items:center;
+  justify-content:center;
+  pointer-events:none;
 }
 
-.slide img{
+.modal-content img{
   max-width:96vw;
   max-height:90vh;
   object-fit:contain;
+  pointer-events:auto;
 }
 
-body.modal-open{overflow:hidden}
+body.modal-open{
+  overflow:hidden;
+}
 </style>
 </head>
 
@@ -108,11 +99,9 @@ body.modal-open{overflow:hidden}
 </div>
 
 <div class="modal" id="modal">
-  <div class="backdrop" id="backdrop"></div>
-  <div class="slider" id="slider">
-    <div class="slide"><img id="prevImg"></div>
-    <div class="slide"><img id="currentImg"></div>
-    <div class="slide"><img id="nextImg"></div>
+  <div class="modal-backdrop" id="modalBackdrop"></div>
+  <div class="modal-content">
+    <img id="modalImg">
   </div>
 </div>
 
@@ -125,18 +114,14 @@ const gallery=document.getElementById("gallery");
 const sentinel=document.getElementById("sentinel");
 
 const modal=document.getElementById("modal");
-const backdrop=document.getElementById("backdrop");
-const slider=document.getElementById("slider");
-const prevImg=document.getElementById("prevImg");
-const currentImg=document.getElementById("currentImg");
-const nextImg=document.getElementById("nextImg");
+const modalBackdrop=document.getElementById("modalBackdrop");
+const modalImg=document.getElementById("modalImg");
 
-let modalImageIds=[];
-let currentIndex=0;
+let imageIds=[];
 let nextPageToken=null;
 let loading=false;
 
-/* LOAD */
+/* ===== LOAD IMAGES ===== */
 async function loadNextImages(){
   if(loading) return;
   loading=true;
@@ -149,12 +134,11 @@ async function loadNextImages(){
   const data=await res.json();
   nextPageToken=data.nextPageToken||null;
 
-  data.files.forEach(f=>{
-    modalImageIds.push(f.id);
-    const i=modalImageIds.length-1;
+  data.files.forEach(file=>{
+    imageIds.push(file.id);
     const img=document.createElement("img");
-    img.src=`https://drive.google.com/thumbnail?id=${f.id}&sz=w500`;
-    img.onclick=()=>openModal(i);
+    img.src=`https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
+    img.onclick=()=>openModal(file.id);
     gallery.insertBefore(img,sentinel);
   });
 
@@ -162,7 +146,7 @@ async function loadNextImages(){
   ensureScrollable();
 }
 
-/* ENSURE DESKTOP SCROLL */
+/* ===== ENSURE DESKTOP SCROLL ===== */
 function ensureScrollable(){
   if(
     nextPageToken &&
@@ -172,32 +156,30 @@ function ensureScrollable(){
   }
 }
 
-/* MODAL */
-function openModal(i){
-  currentIndex=i;
-  updateSlider();
+/* ===== MODAL ===== */
+function openModal(id){
+  modalImg.src=`https://lh3.googleusercontent.com/d/${id}`;
   modal.style.display="block";
   document.body.classList.add("modal-open");
 }
+
 function closeModal(){
   modal.style.display="none";
+  modalImg.src="";
   document.body.classList.remove("modal-open");
 }
-backdrop.onclick=closeModal;
 
-function updateSlider(){
-  const l=modalImageIds.length;
-  prevImg.src = currentIndex>0 ? `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex-1]}` : "";
-  currentImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
-  nextImg.src = currentIndex<l-1 ? `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex+1]}` : "";
-  slider.style.transition="none";
-  slider.style.transform="translateX(-100vw)";
-  requestAnimationFrame(()=>slider.style.transition="transform .35s cubic-bezier(.22,.61,.36,1)");
-}
+modalBackdrop.onclick=closeModal;
 
-/* SCROLL OBSERVER */
+window.addEventListener("keydown",e=>{
+  if(e.key==="Escape") closeModal();
+});
+
+/* ===== INFINITE SCROLL ===== */
 new IntersectionObserver(e=>{
-  if(e[0].isIntersecting && nextPageToken) loadNextImages();
+  if(e[0].isIntersecting && nextPageToken){
+    loadNextImages();
+  }
 },{rootMargin:"400px"}).observe(sentinel);
 
 loadNextImages();
