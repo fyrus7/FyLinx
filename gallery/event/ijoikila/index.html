@@ -6,178 +6,157 @@
 <title>FyLinx Gallery</title>
 
 <style>
-/* ===== GLOBAL SCROLL FIX ===== */
-html, body{
-  min-height:101vh;
+/* RESET */
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
 
-body{
-  margin:0;
+html, body{
+  width:100%;
+  height:auto; /* ❗JANGAN 100vh */
+  overflow-x:hidden;
+  overflow-y:auto; /* scroll hanya body */
   font-family:system-ui,sans-serif;
   background:#fff;
-  color:#111;
 }
 
-/* ===== HEADER ===== */
+/* HEADER */
 header{
-  position:sticky;
-  top:0;
-  z-index:5;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:14px 16px;
+  padding:16px;
+  font-size:20px;
+  font-weight:600;
   border-bottom:1px solid #eee;
-  background:#fff;
 }
-header h1{font-size:14px;margin:0}
-header span{font-size:12px;color:#777}
 
-/* ===== GALLERY ===== */
+/* GALLERY GRID */
 .gallery{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:4px;
+  grid-template-columns:repeat(auto-fill, minmax(180px,1fr));
+  gap:6px;
   padding:6px;
-
-  /* CRITICAL */
-  min-height:calc(100vh - 60px);
 }
 
-@media(min-width:600px){.gallery{grid-template-columns:repeat(4,1fr)}}
-@media(min-width:1024px){.gallery{grid-template-columns:repeat(6,1fr)}}
-
+/* THUMBNAIL */
 .gallery img{
   width:100%;
   aspect-ratio:1/1;
   object-fit:cover;
-  border-radius:4px;
+  display:block;
   cursor:pointer;
 }
 
-/* ===== SENTINEL ===== */
+/* SENTINEL */
 #sentinel{
   grid-column:1/-1;
   height:1px;
-
-  /* CRITICAL */
-  margin-bottom:40vh;
+  margin-bottom:40vh; /* pastikan scrollable awal */
 }
 
-/* ===== MODAL (UNCHANGED, WORKING) ===== */
+/* MODAL SINGLE IMAGE */
 .modal{
   position:fixed;
   inset:0;
+  background:rgba(0,0,0,0.9);
   display:none;
-  z-index:20;
-}
-
-.modal-backdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.92);
-}
-
-.modal-content{
-  position:absolute;
-  inset:0;
-  display:flex;
   align-items:center;
   justify-content:center;
-  pointer-events:none;
+  z-index:9999;
 }
 
-.modal-content img{
+.modal img{
   max-width:96vw;
   max-height:90vh;
   object-fit:contain;
-  pointer-events:auto;
-}
-
-body.modal-open{
-  overflow:hidden;
 }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h1>FyLinx</h1>
-  <span>Ijoy & Kila</span>
-</header>
+<header>FyLinx Gallery</header>
 
-<div class="gallery" id="gallery">
-  <div id="sentinel"></div>
-</div>
+<main>
+  <div class="gallery" id="gallery">
+    <div id="sentinel"></div>
+  </div>
+</main>
 
 <div class="modal" id="modal">
-  <div class="modal-backdrop" id="modalBackdrop"></div>
-  <div class="modal-content">
-    <img id="modalImg">
-  </div>
+  <img id="modalImg">
 </div>
 
 <script>
-const API_KEY="AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
-const FOLDER_ID="1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE";
+const API_KEY="AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U"; // ganti API key sebenar
+const FOLDER_ID="1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE";  // ganti folder ID sebenar
 const PAGE_SIZE=24;
 
-const gallery=document.getElementById("gallery");
-const sentinel=document.getElementById("sentinel");
+const gallery = document.getElementById("gallery");
+const sentinel = document.getElementById("sentinel");
+const modal = document.getElementById("modal");
+const modalImg = document.getElementById("modalImg");
 
-const modal=document.getElementById("modal");
-const modalBackdrop=document.getElementById("modalBackdrop");
-const modalImg=document.getElementById("modalImg");
+let nextPageToken = null;
+let loading = false;
+let imageIds = [];
 
-let nextPageToken=null;
-let loading=false;
-
-/* ===== LOAD ===== */
+/* ===== LOAD IMAGES ===== */
 async function loadNextImages(){
   if(loading) return;
-  loading=true;
+  loading = true;
 
-  const q=encodeURIComponent(`'${FOLDER_ID}' in parents and mimeType contains 'image/'`);
-  let url=`https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=name desc&pageSize=${PAGE_SIZE}&fields=nextPageToken,files(id)&key=${API_KEY}`;
-  if(nextPageToken) url+=`&pageToken=${nextPageToken}`;
+  const query = encodeURIComponent(`'${FOLDER_ID}' in parents and mimeType contains 'image/'`);
+  let url = `https://www.googleapis.com/drive/v3/files?q=${query}&orderBy=name desc&pageSize=${PAGE_SIZE}&fields=nextPageToken,files(id)&key=${API_KEY}`;
+  if(nextPageToken) url += `&pageToken=${nextPageToken}`;
 
-  const res=await fetch(url);
-  const data=await res.json();
-  nextPageToken=data.nextPageToken||null;
+  const res = await fetch(url);
+  const data = await res.json();
+  nextPageToken = data.nextPageToken || null;
 
-  data.files.forEach(file=>{
-    const img=document.createElement("img");
-    img.src=`https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
-    img.onclick=()=>openModal(file.id);
-    gallery.insertBefore(img,sentinel);
+  data.files.forEach(file => {
+    imageIds.push(file.id);
+    const img = document.createElement("img");
+    img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
+    img.loading = "lazy";
+    img.onclick = () => openModal(file.id);
+    gallery.insertBefore(img, sentinel);
   });
 
-  loading=false;
+  loading = false;
+
+  /* pastikan scrollable desktop awal */
+  if(nextPageToken && document.documentElement.scrollHeight <= window.innerHeight + 50){
+    loadNextImages();
+  }
 }
 
-/* ===== MODAL ===== */
+/* ===== MODAL SINGLE IMAGE ===== */
 function openModal(id){
-  modalImg.src=`https://lh3.googleusercontent.com/d/${id}`;
-  modal.style.display="block";
-  document.body.classList.add("modal-open");
+  modalImg.src = `https://lh3.googleusercontent.com/d/${id}`;
+  modal.style.display = "flex";
+  document.body.style.overflow = "hidden"; // lock scroll
 }
 
 function closeModal(){
-  modal.style.display="none";
-  modalImg.src="";
-  document.body.classList.remove("modal-open");
+  modal.style.display = "none";
+  modalImg.src = "";
+  document.body.style.overflow = "auto"; // restore scroll
 }
 
-modalBackdrop.onclick=closeModal;
+modal.addEventListener("click", closeModal);
+window.addEventListener("keydown", e => {
+  if(e.key === "Escape" && modal.style.display === "flex") closeModal();
+});
 
 /* ===== INFINITE SCROLL ===== */
-new IntersectionObserver(e=>{
-  if(e[0].isIntersecting && nextPageToken){
+new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting && nextPageToken){
     loadNextImages();
   }
-},{rootMargin:"300px"}).observe(sentinel);
+},{rootMargin:"400px"}).observe(sentinel);
 
+/* INITIAL LOAD */
 loadNextImages();
 </script>
 
