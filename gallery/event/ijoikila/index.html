@@ -6,6 +6,11 @@
 <title>FyLinx Gallery</title>
 
 <style>
+/* ===== GLOBAL SCROLL FIX ===== */
+html, body{
+  min-height:101vh;
+}
+
 body{
   margin:0;
   font-family:system-ui,sans-serif;
@@ -34,7 +39,11 @@ header span{font-size:12px;color:#777}
   grid-template-columns:repeat(3,1fr);
   gap:4px;
   padding:6px;
+
+  /* CRITICAL */
+  min-height:calc(100vh - 60px);
 }
+
 @media(min-width:600px){.gallery{grid-template-columns:repeat(4,1fr)}}
 @media(min-width:1024px){.gallery{grid-template-columns:repeat(6,1fr)}}
 
@@ -46,12 +55,16 @@ header span{font-size:12px;color:#777}
   cursor:pointer;
 }
 
+/* ===== SENTINEL ===== */
 #sentinel{
   grid-column:1/-1;
   height:1px;
+
+  /* CRITICAL */
+  margin-bottom:40vh;
 }
 
-/* ===== MODAL (SINGLE IMAGE) ===== */
+/* ===== MODAL (UNCHANGED, WORKING) ===== */
 .modal{
   position:fixed;
   inset:0;
@@ -117,11 +130,10 @@ const modal=document.getElementById("modal");
 const modalBackdrop=document.getElementById("modalBackdrop");
 const modalImg=document.getElementById("modalImg");
 
-let imageIds=[];
 let nextPageToken=null;
 let loading=false;
 
-/* ===== LOAD IMAGES ===== */
+/* ===== LOAD ===== */
 async function loadNextImages(){
   if(loading) return;
   loading=true;
@@ -135,7 +147,6 @@ async function loadNextImages(){
   nextPageToken=data.nextPageToken||null;
 
   data.files.forEach(file=>{
-    imageIds.push(file.id);
     const img=document.createElement("img");
     img.src=`https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
     img.onclick=()=>openModal(file.id);
@@ -143,17 +154,6 @@ async function loadNextImages(){
   });
 
   loading=false;
-  ensureScrollable();
-}
-
-/* ===== ENSURE DESKTOP SCROLL ===== */
-function ensureScrollable(){
-  if(
-    nextPageToken &&
-    document.documentElement.scrollHeight <= window.innerHeight + 50
-  ){
-    loadNextImages();
-  }
 }
 
 /* ===== MODAL ===== */
@@ -171,16 +171,12 @@ function closeModal(){
 
 modalBackdrop.onclick=closeModal;
 
-window.addEventListener("keydown",e=>{
-  if(e.key==="Escape") closeModal();
-});
-
 /* ===== INFINITE SCROLL ===== */
 new IntersectionObserver(e=>{
   if(e[0].isIntersecting && nextPageToken){
     loadNextImages();
   }
-},{rootMargin:"400px"}).observe(sentinel);
+},{rootMargin:"300px"}).observe(sentinel);
 
 loadNextImages();
 </script>
