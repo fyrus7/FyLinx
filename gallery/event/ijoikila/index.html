@@ -148,6 +148,17 @@ async function loadNextImages(){
   });
 
   loading = false;
+  requestAnimationFrame(ensureScrollable);
+}
+
+  function ensureScrollable(){
+  if(
+    document.body.scrollHeight <= window.innerHeight &&
+    !loading &&
+    !finished
+  ){
+    loadNextImages();
+  }
 }
 
 /* SCROLL INFINITE LOAD */
@@ -187,6 +198,7 @@ modal.addEventListener("click",e=>{
 
 /* INIT */
 loadNextImages();
+requestAnimationFrame(ensureScrollable);
 </script>
 
 </body>
