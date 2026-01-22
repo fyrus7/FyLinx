@@ -76,12 +76,6 @@ header span{font-size:12px;color:#777}
   font-size:26px;
   color:#fff;
   cursor:pointer;
-  user-select:none;
-}
-
-/* SENTINEL */
-#sentinel{
-  height:200px;
 }
 </style>
 </head>
@@ -94,8 +88,8 @@ header span{font-size:12px;color:#777}
 </header>
 
 <div class="gallery" id="gallery"></div>
-<div id="sentinel"></div>
 
+<!-- MODAL -->
 <div class="modal" id="modal">
   <div class="modal-close" id="modalClose">✕</div>
   <img id="modalImg">
@@ -107,18 +101,17 @@ const FOLDER_ID = "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE";
 const PAGE_SIZE = 24;
 
 const gallery = document.getElementById("gallery");
-const sentinel = document.getElementById("sentinel");
-
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
 const modalClose = document.getElementById("modalClose");
 
 let nextPageToken = null;
 let loading = false;
+let finished = false;
 
 /* LOAD IMAGES */
 async function loadNextImages(){
-  if(loading) return;
+  if(loading || finished) return;
   loading = true;
 
   const query = encodeURIComponent(
@@ -137,6 +130,7 @@ async function loadNextImages(){
   const data = await res.json();
 
   nextPageToken = data.nextPageToken || null;
+  if(!nextPageToken) finished = true;
 
   data.files.forEach(file=>{
     const img = document.createElement("img");
@@ -146,17 +140,18 @@ async function loadNextImages(){
   });
 
   loading = false;
-
-  // 🔥 DESKTOP FIX: auto-load until page scrollable
-  requestAnimationFrame(()=>{
-    if(
-      document.body.scrollHeight <= window.innerHeight &&
-      nextPageToken
-    ){
-      loadNextImages();
-    }
-  });
 }
+
+/* SCROLL INFINITE LOAD */
+window.addEventListener("scroll",()=>{
+  const scrollBottom =
+    window.innerHeight + window.scrollY >=
+    document.body.offsetHeight - 800;
+
+  if(scrollBottom){
+    loadNextImages();
+  }
+});
 
 /* MODAL */
 function openModal(id){
@@ -173,17 +168,6 @@ modalClose.onclick = closeModal;
 modal.addEventListener("click",e=>{
   if(e.target === modal) closeModal();
 });
-
-/* INFINITE SCROLL */
-const observer = new IntersectionObserver(entries=>{
-  if(entries[0].isIntersecting){
-    loadNextImages();
-  }
-},{
-  rootMargin:"800px"
-});
-
-observer.observe(sentinel);
 
 /* INIT */
 loadNextImages();
