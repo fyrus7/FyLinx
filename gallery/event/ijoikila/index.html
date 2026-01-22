@@ -13,7 +13,7 @@ body{
   color:#111;
 }
 
-/* ===== HEADER ===== */
+/* HEADER */
 header{
   position:sticky;
   top:0;
@@ -29,7 +29,7 @@ header{
 header h1{font-size:14px;margin:0}
 header span{font-size:12px;color:#777}
 
-/* ===== GALLERY ===== */
+/* GALLERY */
 .gallery{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -52,7 +52,7 @@ header span{font-size:12px;color:#777}
   cursor:pointer;
 }
 
-/* ===== MODAL ===== */
+/* MODAL */
 .modal{
   position:fixed;
   inset:0;
@@ -79,9 +79,9 @@ header span{font-size:12px;color:#777}
   user-select:none;
 }
 
-/* ===== SENTINEL ===== */
+/* SENTINEL */
 #sentinel{
-  height:120px;
+  height:200px;
 }
 </style>
 </head>
@@ -96,7 +96,6 @@ header span{font-size:12px;color:#777}
 <div class="gallery" id="gallery"></div>
 <div id="sentinel"></div>
 
-<!-- ===== MODAL ===== -->
 <div class="modal" id="modal">
   <div class="modal-close" id="modalClose">✕</div>
   <img id="modalImg">
@@ -114,15 +113,12 @@ const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
 const modalClose = document.getElementById("modalClose");
 
-let imageIds = [];
 let nextPageToken = null;
 let loading = false;
 
-/* ===== LOAD IMAGES ===== */
+/* LOAD IMAGES */
 async function loadNextImages(){
   if(loading) return;
-  if(!nextPageToken && imageIds.length > 0) return;
-
   loading = true;
 
   const query = encodeURIComponent(
@@ -132,7 +128,7 @@ async function loadNextImages(){
   let url =
     `https://www.googleapis.com/drive/v3/files?q=${query}` +
     `&orderBy=name desc&pageSize=${PAGE_SIZE}` +
-    `&fields=nextPageToken,files(id,name)` +
+    `&fields=nextPageToken,files(id)` +
     `&key=${API_KEY}`;
 
   if(nextPageToken) url += `&pageToken=${nextPageToken}`;
@@ -143,8 +139,6 @@ async function loadNextImages(){
   nextPageToken = data.nextPageToken || null;
 
   data.files.forEach(file=>{
-    imageIds.push(file.id);
-
     const img = document.createElement("img");
     img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
     img.onclick = ()=>openModal(file.id);
@@ -152,9 +146,19 @@ async function loadNextImages(){
   });
 
   loading = false;
+
+  // 🔥 DESKTOP FIX: auto-load until page scrollable
+  requestAnimationFrame(()=>{
+    if(
+      document.body.scrollHeight <= window.innerHeight &&
+      nextPageToken
+    ){
+      loadNextImages();
+    }
+  });
 }
 
-/* ===== MODAL ===== */
+/* MODAL */
 function openModal(id){
   modalImg.src = `https://lh3.googleusercontent.com/d/${id}`;
   modal.style.display = "flex";
@@ -166,25 +170,22 @@ function closeModal(){
 }
 
 modalClose.onclick = closeModal;
-
-modal.addEventListener("click", e=>{
+modal.addEventListener("click",e=>{
   if(e.target === modal) closeModal();
 });
 
-/* ===== INFINITE SCROLL ===== */
+/* INFINITE SCROLL */
 const observer = new IntersectionObserver(entries=>{
   if(entries[0].isIntersecting){
     loadNextImages();
   }
 },{
-  root:null,
-  rootMargin:"600px",
-  threshold:0
+  rootMargin:"800px"
 });
 
 observer.observe(sentinel);
 
-/* ===== INIT ===== */
+/* INIT */
 loadNextImages();
 </script>
 
