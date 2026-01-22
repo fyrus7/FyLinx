@@ -13,11 +13,11 @@ body{
   color:#111;
 }
 
+/* HEADER */
 header{
   position:sticky;
   top:0;
   z-index:5;
-
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -29,6 +29,7 @@ header{
 header h1{font-size:14px;margin:0}
 header span{font-size:12px;color:#777}
 
+/* GALLERY */
 .gallery{
   display:grid;
   grid-template-columns:repeat(3,1fr);
@@ -36,8 +37,12 @@ header span{font-size:12px;color:#777}
   padding:6px;
 }
 
-@media(min-width:600px){.gallery{grid-template-columns:repeat(4,1fr)}}
-@media(min-width:1024px){.gallery{grid-template-columns:repeat(6,1fr)}}
+@media(min-width:600px){
+  .gallery{grid-template-columns:repeat(4,1fr)}
+}
+@media(min-width:1024px){
+  .gallery{grid-template-columns:repeat(6,1fr)}
+}
 
 .gallery img{
   width:100%;
@@ -47,7 +52,7 @@ header span{font-size:12px;color:#777}
   cursor:pointer;
 }
 
-/* ===== MODAL ===== */
+/* MODAL */
 .modal{
   position:fixed;
   inset:0;
@@ -55,39 +60,28 @@ header span{font-size:12px;color:#777}
   display:none;
   justify-content:center;
   align-items:center;
-  overflow:hidden;
-  z-index:10;
+  z-index:20;
 }
 
-.slider{
-  display:flex;
-  width:300%;
-  height:100%;
-  transform:translateX(-100%);
-  transition:transform .35s cubic-bezier(.22,.61,.36,1);
-}
-
-.slider img{
-  width:100%;
-  max-width:100vw;
-  max-height:100vh;
-  margin:auto;
+.modal img{
+  max-width:95vw;
+  max-height:95vh;
   object-fit:contain;
 }
 
-body.modal-open{overflow:hidden}
-#sentinel{height:1px}
-
-.modal{
-  pointer-events: auto;
+.modal-close{
+  position:absolute;
+  top:14px;
+  right:16px;
+  font-size:26px;
+  color:#fff;
+  cursor:pointer;
 }
 
-.gallery{
-  pointer-events: auto;
-}
-
-body.modal-open .gallery{
-  pointer-events: none;
+body.modal-open{
+  overflow:hidden;
+  position:fixed;
+  width:100%;
 }
 
 </style>
@@ -101,14 +95,11 @@ body.modal-open .gallery{
 </header>
 
 <div class="gallery" id="gallery"></div>
-<div id="sentinel"></div>
 
+<!-- MODAL -->
 <div class="modal" id="modal">
-  <div class="slider" id="slider">
-    <img id="prevImg">
-    <img id="currentImg">
-    <img id="nextImg">
-  </div>
+  <div class="modal-close" id="modalClose">✕</div>
+  <img id="modalImg">
 </div>
 
 <script>
@@ -116,131 +107,98 @@ const API_KEY="AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 const FOLDER_ID="1xGqkPTjU9Z9eIXJWHrnFc8ebd3jadsKA";
 const PAGE_SIZE=24;
 
-const gallery=document.getElementById("gallery");
-const sentinel=document.getElementById("sentinel");
+const gallery = document.getElementById("gallery");
+const modal = document.getElementById("modal");
+const modalImg = document.getElementById("modalImg");
+const modalClose = document.getElementById("modalClose");
 
-const modal=document.getElementById("modal");
-const slider=document.getElementById("slider");
-const prevImg=document.getElementById("prevImg");
-const currentImg=document.getElementById("currentImg");
-const nextImg=document.getElementById("nextImg");
+let nextPageToken = null;
+let loading = false;
+let finished = false;
+let scrollY = 0;
 
-let modalImageIds=[];
-let currentIndex=0;
-let nextPageToken=null;
-let loading=false;
-
-/* ===== LOAD IMAGES ===== */
+/* LOAD IMAGES */
 async function loadNextImages(){
-  if(loading) return;
-  loading=true;
+  if(loading || finished) return;
+  loading = true;
 
-  const query=encodeURIComponent(
+  const query = encodeURIComponent(
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
   );
 
-  let url=`https://www.googleapis.com/drive/v3/files?q=${query}&orderBy=name desc&pageSize=${PAGE_SIZE}&fields=nextPageToken,files(id,name)&key=${API_KEY}`;
-  if(nextPageToken) url+=`&pageToken=${nextPageToken}`;
+  let url =
+    `https://www.googleapis.com/drive/v3/files?q=${query}` +
+    `&orderBy=name desc&pageSize=${PAGE_SIZE}` +
+    `&fields=nextPageToken,files(id)` +
+    `&key=${API_KEY}`;
 
-  const res=await fetch(url);
-  const data=await res.json();
-  nextPageToken=data.nextPageToken||null;
+  if(nextPageToken) url += `&pageToken=${nextPageToken}`;
 
-  data.files.forEach(addImage);
-  loading=false;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  nextPageToken = data.nextPageToken || null;
+  if(!nextPageToken) finished = true;
+
+  data.files.forEach(file=>{
+    const img = document.createElement("img");
+    img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
+    img.onclick = ()=>openModal(file.id);
+    gallery.appendChild(img);
+  });
+
+  loading = false;
+  requestAnimationFrame(ensureScrollable);
 }
 
-function addImage(file){
-  modalImageIds.push(file.id);
-  const idx=modalImageIds.length-1;
-
-  const img=document.createElement("img");
-  img.src=`https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
-  img.onclick=()=>openModal(idx);
-  gallery.appendChild(img);
+  function ensureScrollable(){
+  if(
+    document.body.scrollHeight <= window.innerHeight &&
+    !loading &&
+    !finished
+  ){
+    loadNextImages();
+  }
 }
 
-/* ===== MODAL ===== */
-function openModal(index){
-  currentIndex=index;
-  updateSlider();
-  modal.style.display="flex";
-  document.body.classList.add("modal-open");
-}
+/* SCROLL INFINITE LOAD */
+window.addEventListener("scroll",()=>{
+  const scrollBottom =
+    window.innerHeight + window.scrollY >=
+    document.body.offsetHeight - 800;
 
-function updateSlider(){
-  const len=modalImageIds.length;
-
-  prevImg.src = currentIndex>0
-    ? `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex-1]}`
-    : "";
-
-  currentImg.src =
-    `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
-
-  nextImg.src = currentIndex<len-1
-    ? `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex+1]}`
-    : "";
-
-  slider.style.transition="none";
-  slider.style.transform="translateX(-100%)";
-}
-
-/* ===== TAP BLACK CLOSE ===== */
-slider.addEventListener("click",e=>e.stopPropagation());
-modal.addEventListener("click", e => {
-  if (e.target === modal) {
-    e.stopPropagation();
-    closeModal();
+  if(scrollBottom){
+    loadNextImages();
   }
 });
+
+/* MODAL */
+function openModal(id){
+  scrollY = window.scrollY;
+  document.body.classList.add("modal-open");
+  document.body.style.top = `-${scrollY}px`;
+
+  modalImg.src = `https://lh3.googleusercontent.com/d/${id}`;
+  modal.style.display = "flex";
+}
+
 function closeModal(){
   modal.style.display = "none";
+  modalImg.src = "";
+
   document.body.classList.remove("modal-open");
+  document.body.style.top = "";
+  window.scrollTo(0, scrollY);
 }
 
-/* ===== CONNECTED SWIPE ===== */
-let startX=0, deltaX=0, swiping=false;
-const THRESHOLD=70;
-
-modal.addEventListener("touchstart",e=>{
-  startX=e.touches[0].clientX;
-  swiping=true;
-  slider.style.transition="none";
-},{passive:true});
-
-modal.addEventListener("touchmove",e=>{
-  if(!swiping) return;
-  deltaX=e.touches[0].clientX-startX;
-  slider.style.transform=`translateX(calc(-100% + ${deltaX}px))`;
-},{passive:true});
-
-modal.addEventListener("touchend",()=>{
-  if(!swiping) return;
-  swiping=false;
-
-  slider.style.transition="transform .35s cubic-bezier(.22,.61,.36,1)";
-
-  if(Math.abs(deltaX)<THRESHOLD){
-    slider.style.transform="translateX(-100%)";
-    return;
-  }
-
-  if(deltaX<0 && currentIndex<modalImageIds.length-1){
-    currentIndex++;
-  }else if(deltaX>0 && currentIndex>0){
-    currentIndex--;
-  }
-
-  updateSlider();
+modalClose.onclick = closeModal;
+modal.addEventListener("click",e=>{
+  if(e.target === modal) closeModal();
 });
 
-/* ===== INFINITE SCROLL ===== */
-new IntersectionObserver(e=>{
-  if(e[0].isIntersecting && nextPageToken) loadNextImages();
-},{rootMargin:"300px"}).observe(sentinel);
-
+/* INIT */
 loadNextImages();
+requestAnimationFrame(ensureScrollable);
 </script>
 
 </body>
