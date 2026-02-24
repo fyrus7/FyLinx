@@ -35,36 +35,23 @@ button{
   cursor:pointer;
 }
 
-.gallery{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  grid-auto-rows:110px; /* default mobile */
-  gap:8px;
-  padding:8px;
+#imageGrid{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-width:95%;
+  margin:0 auto;
 }
 
-@media(min-width:768px){ /* desktop */
-  .gallery{
-    grid-auto-rows:120px;
-  }
-}
-
-.gallery img{
+.row{
+  display:flex;
+  gap:6px;
   width:100%;
-  height:100%;
+}
+
+.row img{
   object-fit:cover;
   cursor:pointer;
-}
-
-/* Landscape → lebar + lebih tinggi */
-.gallery img.landscape{
-  grid-column:span 2;   /* lebar 2 column */
-  grid-row:span 2;      /* tinggi 2 row */
-}
-
-/* Portrait → tinggi 2 row */
-.gallery img.portrait{
-  grid-row:span 2;
 }
 
 footer{
@@ -82,21 +69,51 @@ footer{
   display:none;
   flex-direction:column;
   justify-content:space-between;
+  align-items:center;
   z-index:100;
-}
-
-.modal-bar{
-  background:rgba(0,0,0,.6);
-  text-align:center;
-  padding:14px;
-  font-size:13px;
-  cursor:pointer;
 }
 
 .modal img{
   max-width:95%;
-  max-height:80%;
+  max-height:85%;
   margin:auto;
+}
+
+#modalImg{
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.modal-info{
+  text-align:center;
+  padding:16px 20px 22px;
+  font-size:13px;
+  opacity:0.8;
+  line-height:1.6;
+}
+
+.slide-out-left{
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-out-right{
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-in-left{
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-in-right{
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+body.modal-open{
+  overflow: hidden;
+  height: 100vh;
 }
 </style>
 </head>
@@ -108,39 +125,31 @@ footer{
   <span style="font-size:12px; color:#fff; margin-left: auto;">Noor & Izrul</span>
 </header>
 
-<div class="gallery" id="gallery"></div>
+<div id="imageGrid"></div>
 
 <footer>© FyLinx</footer>
 
 <div class="modal" id="modal">
-  <div class="modal-bar" id="modalCloseBar">
-    Click here to close
-  </div>
-
   <img id="modalImg">
 
-  <div class="modal-bar" id="modalDownloadBar">
-    Download
+  <div class="modal-info">
+    <div>Hold photo to download</div>
+    <div>Tap here to close</div>
   </div>
 </div>
 
 <script>
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 const FOLDER_ID = "1Z6zqsm-61hpz1TnfciEl8WR-RhQ4g-c4";
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 let nextPageToken = null;
-const gallery = document.getElementById("gallery");
+const gallery = document.getElementById("imageGrid");
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
 
 let modalImageIds = [];
 let currentIndex = 0;
-
-const modalCloseBar = document.getElementById("modalCloseBar");
-const modalDownloadBar = document.getElementById("modalDownloadBar");
-
-let currentImageId = null;
   
 // ------------------- MORE button -------------------
 const moreBtn = document.createElement("button");
@@ -180,74 +189,185 @@ async function loadNextImages(){
   nextPageToken = data.nextPageToken || null;
 
   // 🔥 NATURAL SORT ikut nombor dalam nama (Z–A)
-  data.files
-    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name))
-    .forEach(file => addImage(file));
+  const sorted = data.files
+    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
+  
+  addImages(sorted);
 }
 
 // ------------------- Add image -------------------
-function addImage(file){
-  if(document.getElementById(`img-${file.id}`)) return;
+let loadedImages = [];
 
-  modalImageIds.push(file.id);
+function addImages(files){
 
-  const img = document.createElement("img");
-  img.id = `img-${file.id}`;
-  img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
+  const preload = files.map(file => new Promise(resolve=>{
+    const img = new Image();
+    img.onload = ()=>{
+      resolve({
+        id: file.id,
+        thumb: `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`,
+        full: `https://lh3.googleusercontent.com/d/${file.id}`,
+        ratio: img.naturalWidth / img.naturalHeight
+      });
+    };
+    img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
+  }));
 
-  img.onload = ()=>{
-    if(img.naturalWidth > img.naturalHeight){
-      img.classList.add("landscape");
-    } else {
-      img.classList.add("portrait");
+  Promise.all(preload).then(images=>{
+    images.forEach(img => modalImageIds.push(img.id));
+    loadedImages = loadedImages.concat(images);
+    renderJustified(images);
+  });
+}
+
+
+function renderJustified(images){
+
+  const container = document.getElementById("imageGrid");
+  const TARGET_ROW_HEIGHT = 220;
+  const containerWidth = container.clientWidth;
+
+  let row = [];
+  let rowWidth = 0;
+
+  function addRow(row, rowWidth){
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "row";
+
+    const scale = containerWidth / rowWidth;
+
+    row.forEach(item=>{
+      const img = document.createElement("img");
+      img.src = item.thumb;
+      img.style.height = `${TARGET_ROW_HEIGHT * scale}px`;
+      img.style.width = `${TARGET_ROW_HEIGHT * scale * item.ratio}px`;
+
+      img.onclick = ()=>openModal(item.id);
+
+      rowDiv.appendChild(img);
+    });
+
+    container.appendChild(rowDiv);
+  }
+
+  images.forEach(img=>{
+    const scaledWidth = img.ratio * TARGET_ROW_HEIGHT;
+    row.push(img);
+    rowWidth += scaledWidth;
+
+    if(rowWidth >= containerWidth){
+      addRow(row, rowWidth);
+      row = [];
+      rowWidth = 0;
     }
-  };
+  });
 
-  img.onclick = ()=>openModal(file.id);
-  gallery.appendChild(img);
+  if(row.length){
+    addRow(row, rowWidth);
+  }
 }
 
 // ------------------- Modal -------------------
 function openModal(fileId){
-  currentImageId = fileId;
   currentIndex = modalImageIds.indexOf(fileId);
-  modalImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
+  showModalImage(currentIndex);
   modal.style.display = "flex";
+
+  document.body.classList.add("modal-open");
 }
 
-modalCloseBar.onclick = ()=>{
-  modal.style.display = "none";
-};
+function showModalImage(newIndex){
 
-modalDownloadBar.onclick = ()=>{
-  if(!currentImageId) return;
+  const total = modalImageIds.length;
 
-  window.open(
-    `https://drive.google.com/uc?export=download&id=${currentImageId}`,
-    "_blank"
+  if(newIndex < 0) newIndex = total - 1;
+  if(newIndex >= total) newIndex = 0;
+
+  const diff = newIndex - currentIndex;
+
+  let direction;
+
+  if(diff === 1 || diff === -(total - 1)){
+    direction = "right";
+  } else {
+    direction = "left";
+  }
+
+  modalImg.classList.add(
+    direction === "right" ? "slide-out-left" : "slide-out-right"
   );
-};
 
-modal.onclick = e=>{
-  if(e.target === modal) modal.style.display = "none";
-};
+  setTimeout(()=>{
+
+    currentIndex = newIndex;
+    modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[newIndex]}`;
+
+    modalImg.classList.remove("slide-out-left","slide-out-right");
+
+    modalImg.classList.add(
+      direction === "right" ? "slide-in-right" : "slide-in-left"
+    );
+
+    requestAnimationFrame(()=>{
+      modalImg.classList.remove("slide-in-left","slide-in-right");
+    });
+
+  }, 300);
+}
+
+modal.addEventListener("click", e=>{
+  if(e.target !== modalImg){
+    modal.style.display = "none";
+    document.body.classList.remove("modal-open");
+  }
+});
 
 document.addEventListener("keydown", e=>{
   if(modal.style.display !== "flex") return;
 
   if(e.key === "ArrowRight"){
-    currentIndex = (currentIndex + 1) % modalImageIds.length;
-  }
-  if(e.key === "ArrowLeft"){
-    currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
-  }
-  if(e.key === "Escape"){
-    modal.style.display = "none";
-    return;
+    showModalImage((currentIndex + 1) % modalImageIds.length);
   }
 
-  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
+  if(e.key === "ArrowLeft"){
+    showModalImage(
+      (currentIndex - 1 + modalImageIds.length) % modalImageIds.length
+    );
+  }
+
+  if(e.key === "Escape"){
+    modal.style.display = "none";
+    document.body.classList.remove("modal-open");
+  }
 });
+
+let touchStartX = 0;
+let touchEndX = 0;
+
+modalImg.addEventListener("touchstart", e=>{
+  touchStartX = e.touches[0].clientX;
+});
+
+modalImg.addEventListener("touchend", e=>{
+  touchEndX = e.changedTouches[0].clientX;
+  handleSwipe();
+});
+
+function handleSwipe(){
+  const threshold = 60; // boleh adjust
+
+  if(touchEndX - touchStartX > threshold){
+    // swipe right
+    showModalImage(
+      (currentIndex - 1 + modalImageIds.length) % modalImageIds.length
+    );
+  }
+
+  if(touchStartX - touchEndX > threshold){
+    // swipe left
+    showModalImage((currentIndex + 1) % modalImageIds.length);
+  }
+}
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
