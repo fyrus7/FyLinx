@@ -65,11 +65,22 @@ footer{
 .modal{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.9);
   display:none;
+  z-index:100;
+}
+
+.modal-overlay{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.9);
+}
+
+.modal-inner{
+  position:relative;
+  height:100%;
+  display:flex;
   flex-direction:column;
   justify-content:space-between;
-  z-index:100;
 }
 
 .modal-bar{
@@ -163,15 +174,23 @@ body.modal-open{
 <footer>© FyLinx</footer>
 
 <div class="modal" id="modal">
-  <div class="modal-bar" id="modalCloseBar">
-    Tap on black area to close
+
+  <div class="modal-overlay" id="modalOverlay"></div>
+
+  <div class="modal-inner">
+
+    <div class="modal-bar">
+      Tap on black area to close
+    </div>
+
+    <div class="modal-content">
+      <div class="modal-arrow" id="modalPrev">&#10094;</div>
+      <img id="modalImg">
+      <div class="modal-arrow" id="modalNext">&#10095;</div>
+    </div>
+
   </div>
 
-  <div class="modal-content">
-    <div class="modal-arrow" id="modalPrev">&#10094;</div>
-    <img id="modalImg">
-    <div class="modal-arrow" id="modalNext">&#10095;</div>
-  </div>
 </div>
 
 <script>
@@ -348,12 +367,6 @@ function showModalImage(newIndex){
   }, 300);
 }
 
-modal.addEventListener("click", e=>{
-  if(e.target === modal){
-    closeModal();
-  }
-});
-
 function closeModal(){
   modal.style.display = "none";
   document.body.classList.remove("modal-open");
@@ -407,6 +420,9 @@ function handleSwipe(){
 
 const modalPrev = document.getElementById("modalPrev");
 const modalNext = document.getElementById("modalNext");
+
+const modalOverlay = document.getElementById("modalOverlay");
+modalOverlay.onclick = closeModal;
 
 modalPrev.onclick = ()=>{
   showModalImage(
