@@ -349,8 +349,7 @@ function showModalImage(newIndex){
 }
 
 modal.addEventListener("click", e=>{
-  // kalau klik bukan pada content (image + arrow)
-  if(!e.target.closest(".modal-content")){
+  if(e.target === modal){
     closeModal();
   }
 });
