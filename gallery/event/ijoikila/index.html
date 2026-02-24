@@ -118,6 +118,30 @@ footer{
 #modalNext{
   right:10px;
 }
+
+#modalImg{
+  transition: transform 0.35s ease, opacity 0.35s ease;
+}
+
+.slide-out-left{
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-out-right{
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-in-left{
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.slide-in-right{
+  transform: translateX(-100%);
+  opacity: 0;
+}
 </style>
 </head>
 
@@ -282,11 +306,32 @@ function openModal(fileId){
   modal.style.display = "flex";
 }
 
-function showModalImage(index){
-  if(index < 0 || index >= modalImageIds.length) return;
+function showModalImage(newIndex){
 
-  currentIndex = index;
-  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[index]}`;
+  if(newIndex < 0 || newIndex >= modalImageIds.length) return;
+
+  const direction = newIndex > currentIndex ? "right" : "left";
+
+  modalImg.classList.add(
+    direction === "right" ? "slide-out-left" : "slide-out-right"
+  );
+
+  setTimeout(()=>{
+
+    currentIndex = newIndex;
+    modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[newIndex]}`;
+
+    modalImg.classList.remove("slide-out-left","slide-out-right");
+
+    modalImg.classList.add(
+      direction === "right" ? "slide-in-right" : "slide-in-left"
+    );
+
+    requestAnimationFrame(()=>{
+      modalImg.classList.remove("slide-in-left","slide-in-right");
+    });
+
+  }, 300);
 }
 
 modalCloseBar.onclick = ()=>{
