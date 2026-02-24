@@ -117,7 +117,7 @@ const FOLDER_ID = "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE";
 const PAGE_SIZE = 10;
 
 let nextPageToken = null;
-const gallery = document.getElementById("gallery");
+const gallery = document.getElementById("imageGrid");
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
 
@@ -192,6 +192,7 @@ function addImages(files){
   }));
 
   Promise.all(preload).then(images=>{
+    images.forEach(img => modalImageIds.push(img.id));
     loadedImages = loadedImages.concat(images);
     renderJustified(images);
   });
