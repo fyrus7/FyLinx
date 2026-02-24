@@ -119,13 +119,7 @@ footer{
 
 <header>
   <h1>FyLinx</h1>
-
-  <div style="display:flex; gap:8px; align-items:center;">
-    <span style="font-size:12px;">Ijoy & Kila</span>
-    <div id="headerActions">
-      <button id="selectBtn">Select</button>
-    </div>
-  </div>
+  <span style="font-size:12px; color:#fff; margin-left: auto;">Noor & Izrul</span>
 </header>
 
 <div class="gallery" id="gallery"></div>
@@ -134,7 +128,7 @@ footer{
 
 <div class="modal" id="modal">
   <div class="modal-bar" id="modalCloseBar">
-    Click here to close
+    click anywhere to close
   </div>
 
   <img id="modalImg">
@@ -156,12 +150,6 @@ const modalImg = document.getElementById("modalImg");
 
 let modalImageIds = [];
 let currentIndex = 0;
-
-let selectMode = false;
-let selectedIds = new Set();
-
-const headerActions = document.getElementById("headerActions");
-const selectBtn = document.getElementById("selectBtn");
 
 // ------------------- MORE button -------------------
 const moreBtn = document.createElement("button");
@@ -212,21 +200,6 @@ function addImage(file){
 
   modalImageIds.push(file.id);
 
-  const wrapper = document.createElement("div");
-  wrapper.className = "img-wrapper";
-
-  const checkbox = document.createElement("input");
-  checkbox.type = "checkbox";
-  checkbox.className = "img-checkbox";
-
-  checkbox.onchange = ()=>{
-    if(checkbox.checked){
-      selectedIds.add(file.id);
-    } else {
-      selectedIds.delete(file.id);
-    }
-  };
-
   const img = document.createElement("img");
   img.id = `img-${file.id}`;
   img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
@@ -239,18 +212,8 @@ function addImage(file){
     }
   };
 
-  img.onclick = ()=>{
-    if(selectMode){
-      checkbox.checked = !checkbox.checked;
-      checkbox.dispatchEvent(new Event("change"));
-    } else {
-      openModal(file.id);
-    }
-  };
-
-  wrapper.appendChild(img);
-  wrapper.appendChild(checkbox);
-  gallery.appendChild(wrapper);
+  img.onclick = ()=>openModal(file.id);
+  gallery.appendChild(img);
 }
 
 // ------------------- Modal -------------------
@@ -280,83 +243,6 @@ document.addEventListener("keydown", e=>{
 
   modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
 });
-
-selectBtn.onclick = ()=>{
-  if(!selectMode){
-    enterSelectMode();
-  }
-};
-
-function enterSelectMode(){
-  selectMode = true;
-  selectedIds.clear();
-
-  document.querySelectorAll(".img-checkbox")
-    .forEach(cb => cb.style.display = "block");
-
-  headerActions.innerHTML = `
-    <button id="downloadBtn">Download</button>
-    <button id="cancelBtn">Cancel</button>
-  `;
-
-  document.getElementById("downloadBtn").onclick = downloadSelected;
-  document.getElementById("cancelBtn").onclick = exitSelectMode;
-}
-
-function exitSelectMode(){
-  selectMode = false;
-  selectedIds.clear();
-
-  document.querySelectorAll(".img-checkbox")
-    .forEach(cb=>{
-      cb.checked = false;
-      cb.style.display = "none";
-    });
-
-  headerActions.innerHTML = `<button id="selectBtn">Select</button>`;
-  document.getElementById("selectBtn").onclick = enterSelectMode;
-}
-
-async function downloadSelected(){
-  if(selectedIds.size === 0) return;
-
-  for(const id of selectedIds){
-    const link = document.createElement("a");
-    link.href = `https://drive.google.com/uc?export=download&id=${id}`;
-    link.download = "";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    await new Promise(r=>setTimeout(r,300));
-  }
-
-  exitSelectMode();
-}
-
-const modalCloseBar = document.getElementById("modalCloseBar");
-const modalDownloadBar = document.getElementById("modalDownloadBar");
-
-let currentImageId = null;
-
-function openModal(fileId){
-  currentImageId = fileId;
-  currentIndex = modalImageIds.indexOf(fileId);
-  modalImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
-  modal.style.display = "flex";
-}
-
-modalCloseBar.onclick = ()=>{
-  modal.style.display = "none";
-};
-
-modalDownloadBar.onclick = ()=>{
-  if(!currentImageId) return;
-  window.open(
-    `https://drive.google.com/uc?export=download&id=${currentImageId}`,
-    "_blank"
-  );
-};
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
