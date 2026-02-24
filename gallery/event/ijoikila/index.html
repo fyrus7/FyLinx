@@ -65,22 +65,11 @@ footer{
 .modal{
   position:fixed;
   inset:0;
-  display:none;
-  z-index:100;
-}
-
-.modal-overlay{
-  position:absolute;
-  inset:0;
   background:rgba(0,0,0,.9);
-}
-
-.modal-inner{
-  position:relative;
-  height:100%;
-  display:flex;
+  display:none;
   flex-direction:column;
   justify-content:space-between;
+  z-index:100;
 }
 
 .modal-bar{
@@ -153,12 +142,6 @@ footer{
   transform: translateX(-100%);
   opacity: 0;
 }
-
-body.modal-open{
-  position:fixed;
-  width:100%;
-  overflow:hidden;
-}
 </style>
 </head>
 
@@ -174,23 +157,15 @@ body.modal-open{
 <footer>© FyLinx</footer>
 
 <div class="modal" id="modal">
-
-  <div class="modal-overlay" id="modalOverlay"></div>
-
-  <div class="modal-inner">
-
-    <div class="modal-bar">
-      Tap on black area to close
-    </div>
-
-    <div class="modal-content">
-      <div class="modal-arrow" id="modalPrev">&#10094;</div>
-      <img id="modalImg">
-      <div class="modal-arrow" id="modalNext">&#10095;</div>
-    </div>
-
+  <div class="modal-bar" id="modalCloseBar">
+    Click here to close
   </div>
 
+  <div class="modal-content">
+    <div class="modal-arrow" id="modalPrev">&#10094;</div>
+    <img id="modalImg">
+    <div class="modal-arrow" id="modalNext">&#10095;</div>
+  </div>
 </div>
 
 <script>
@@ -205,7 +180,6 @@ const modalImg = document.getElementById("modalImg");
 
 let modalImageIds = [];
 let currentIndex = 0;
-let scrollY = 0;
 
 const modalCloseBar = document.getElementById("modalCloseBar");
   
@@ -327,15 +301,8 @@ function renderJustified(images){
 
 // ------------------- Modal -------------------
 function openModal(fileId){
-
   currentIndex = modalImageIds.indexOf(fileId);
   showModalImage(currentIndex);
-
-  scrollY = window.scrollY;
-
-  document.body.classList.add("modal-open");
-  document.body.style.top = `-${scrollY}px`;
-
   modal.style.display = "flex";
 }
 
@@ -367,12 +334,13 @@ function showModalImage(newIndex){
   }, 300);
 }
 
-function closeModal(){
+modalCloseBar.onclick = ()=>{
   modal.style.display = "none";
-  document.body.classList.remove("modal-open");
-  document.body.style.top = "";
-  window.scrollTo(0, scrollY);
-}
+};
+
+modal.onclick = e=>{
+  if(e.target === modal) modal.style.display = "none";
+};
 
 document.addEventListener("keydown", e=>{
   if(modal.style.display !== "flex") return;
@@ -420,9 +388,6 @@ function handleSwipe(){
 
 const modalPrev = document.getElementById("modalPrev");
 const modalNext = document.getElementById("modalNext");
-
-const modalOverlay = document.getElementById("modalOverlay");
-modalOverlay.onclick = closeModal;
 
 modalPrev.onclick = ()=>{
   showModalImage(
