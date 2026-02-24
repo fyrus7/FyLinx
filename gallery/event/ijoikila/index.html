@@ -37,14 +37,34 @@ button{
 
 .gallery{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(2,1fr);
   gap:8px;
+  padding:8px;
+}
+
+@media(min-width:768px){
+  .gallery{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+@media(min-width:1200px){
+  .gallery{
+    grid-template-columns:repeat(5,1fr);
+  }
+}
+
+@media(min-width:1600px){
+  .gallery{
+    grid-template-columns:repeat(6,1fr);
+  }
 }
 
 .gallery img{
   width:100%;
   height:100%;
   object-fit:cover;
+  cursor:pointer;
 }
 
 footer{
@@ -107,7 +127,7 @@ footer{
 <script>
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 const FOLDER_ID = "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE";
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 10;
 
 let nextPageToken = null;
 const gallery = document.getElementById("gallery");
@@ -166,13 +186,26 @@ async function loadNextImages(){
 }
 
 // ------------------- Add image -------------------
-function addImage(file, index){
-  const img = document.createElement("img");
+function addImage(file){
 
+  if(document.getElementById(`img-${file.id}`)) return;
+
+  const img = document.createElement("img");
+  img.id = `img-${file.id}`;
   img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
 
-  // Pattern 5 gambar repeat
-  const pattern = index % 5;
+  const index = gallery.children.length;
+  const pattern = index % 6;
+
+  /*
+    Pattern 6 repeat:
+    0 → big (2x2)
+    1 → normal
+    2 → normal
+    3 → wide (2x1)
+    4 → normal
+    5 → normal
+  */
 
   if(pattern === 0){
     img.style.gridColumn = "span 2";
@@ -181,6 +214,8 @@ function addImage(file, index){
   else if(pattern === 3){
     img.style.gridColumn = "span 2";
   }
+
+  img.onclick = ()=>openModal(file.id);
 
   gallery.appendChild(img);
 }
