@@ -133,7 +133,7 @@ button:disabled{
 <div id="imageGrid"></div>
 
 <footer>
-      &copy; <span id="year"></span> FyLinx.
+  &copy; <span id="year"></span> FyLinx.
 </footer>
 
 <div class="modal" id="modal">
@@ -144,6 +144,11 @@ button:disabled{
     <div>Tap here to close</div>
   </div>
 </div>
+
+<script>
+    // Get the current year from the device and update the copyright span
+    document.getElementById("year").textContent = new Date().getFullYear();
+</script>
 
 <script>
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
