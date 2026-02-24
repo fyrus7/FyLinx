@@ -37,15 +37,26 @@ button{
 
 .gallery{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
-  grid-auto-rows:110px; /* default mobile */
+  grid-template-columns:repeat(2,1fr);
   gap:8px;
   padding:8px;
 }
 
-@media(min-width:768px){ /* desktop */
+@media(min-width:768px){
   .gallery{
-    grid-auto-rows:120px;
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+
+@media(min-width:1200px){
+  .gallery{
+    grid-template-columns:repeat(5,1fr);
+  }
+}
+
+@media(min-width:1600px){
+  .gallery{
+    grid-template-columns:repeat(6,1fr);
   }
 }
 
@@ -54,17 +65,6 @@ button{
   height:100%;
   object-fit:cover;
   cursor:pointer;
-}
-
-/* Landscape → lebar + lebih tinggi */
-.gallery img.landscape{
-  grid-column:span 2;   /* lebar 2 column */
-  grid-row:span 2;      /* tinggi 2 row */
-}
-
-/* Portrait → tinggi 2 row */
-.gallery img.portrait{
-  grid-row:span 2;
 }
 
 footer{
@@ -187,23 +187,36 @@ async function loadNextImages(){
 
 // ------------------- Add image -------------------
 function addImage(file){
-  if(document.getElementById(`img-${file.id}`)) return;
 
-  modalImageIds.push(file.id);
+  if(document.getElementById(`img-${file.id}`)) return;
 
   const img = document.createElement("img");
   img.id = `img-${file.id}`;
-  img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
+  img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
 
-  img.onload = ()=>{
-    if(img.naturalWidth > img.naturalHeight){
-      img.classList.add("landscape");
-    } else {
-      img.classList.add("portrait");
-    }
-  };
+  const index = gallery.children.length;
+  const pattern = index % 6;
+
+  /*
+    Pattern 6 repeat:
+    0 → big (2x2)
+    1 → normal
+    2 → normal
+    3 → wide (2x1)
+    4 → normal
+    5 → normal
+  */
+
+  if(pattern === 0){
+    img.style.gridColumn = "span 2";
+    img.style.gridRow = "span 2";
+  }
+  else if(pattern === 3){
+    img.style.gridColumn = "span 2";
+  }
 
   img.onclick = ()=>openModal(file.id);
+
   gallery.appendChild(img);
 }
 
