@@ -74,7 +74,7 @@ footer{
   opacity:.5;
 }
 
-/* ===== MODAL TOP/BOTTOM BAR ===== */
+/* Modal */
 .modal{
   position:fixed;
   inset:0;
@@ -98,20 +98,6 @@ footer{
   max-height:80%;
   margin:auto;
 }
-
-/* ===== SELECT MODE ===== */
-.img-wrapper{
-  position:relative;
-}
-
-.img-checkbox{
-  position:absolute;
-  top:6px;
-  left:6px;
-  width:18px;
-  height:18px;
-  display:none;
-}
 </style>
 </head>
 
@@ -128,7 +114,7 @@ footer{
 
 <div class="modal" id="modal">
   <div class="modal-bar" id="modalCloseBar">
-    click anywhere to close
+    Click here to close
   </div>
 
   <img id="modalImg">
@@ -151,6 +137,11 @@ const modalImg = document.getElementById("modalImg");
 let modalImageIds = [];
 let currentIndex = 0;
 
+const modalCloseBar = document.getElementById("modalCloseBar");
+const modalDownloadBar = document.getElementById("modalDownloadBar");
+
+let currentImageId = null;
+  
 // ------------------- MORE button -------------------
 const moreBtn = document.createElement("button");
 moreBtn.textContent = "MORE";
@@ -218,10 +209,24 @@ function addImage(file){
 
 // ------------------- Modal -------------------
 function openModal(fileId){
+  currentImageId = fileId;
   currentIndex = modalImageIds.indexOf(fileId);
   modalImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
   modal.style.display = "flex";
 }
+
+modalCloseBar.onclick = ()=>{
+  modal.style.display = "none";
+};
+
+modalDownloadBar.onclick = ()=>{
+  if(!currentImageId) return;
+
+  window.open(
+    `https://drive.google.com/uc?export=download&id=${currentImageId}`,
+    "_blank"
+  );
+};
 
 modal.onclick = e=>{
   if(e.target === modal) modal.style.display = "none";
