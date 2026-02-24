@@ -115,6 +115,10 @@ body.modal-open{
   overflow: hidden;
   height: 100vh;
 }
+button:disabled{
+  opacity:0.6;
+  cursor:default;
+}
 </style>
 </head>
 
@@ -144,6 +148,7 @@ const FOLDER_ID = "1Z6zqsm-61hpz1TnfciEl8WR-RhQ4g-c4";
 const PAGE_SIZE = 10;
 
 let nextPageToken = null;
+let isLoading = false;
 const gallery = document.getElementById("imageGrid");
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
@@ -170,6 +175,13 @@ function extractNumber(name){
 
 // ------------------- Load images -------------------
 async function loadNextImages(){
+
+  if(isLoading) return; // elak double click
+  isLoading = true;
+
+  moreBtn.disabled = true;
+  moreBtn.textContent = "Loading...";
+
   const query = encodeURIComponent(
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
   );
@@ -177,7 +189,7 @@ async function loadNextImages(){
   let url =
     `https://www.googleapis.com/drive/v3/files?` +
     `q=${query}` +
-    `&orderBy=name desc` + // paging stabil
+    `&orderBy=name desc` +
     `&pageSize=${PAGE_SIZE}` +
     `&fields=nextPageToken,files(id,name)` +
     `&key=${API_KEY}`;
@@ -189,15 +201,19 @@ async function loadNextImages(){
 
   nextPageToken = data.nextPageToken || null;
 
+  const sorted = data.files
+    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
+
+  addImages(sorted);
+
+  // reset button
+  isLoading = false;
+  moreBtn.disabled = false;
+  moreBtn.textContent = "MORE";
+
   if(!nextPageToken){
     moreBtn.style.display = "none";
   }
-
-  // 🔥 NATURAL SORT ikut nombor dalam nama (Z–A)
-  const sorted = data.files
-    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
-  
-  addImages(sorted);
 }
 
 // ------------------- Add image -------------------
