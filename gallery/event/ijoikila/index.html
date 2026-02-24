@@ -249,8 +249,16 @@ function renderJustified(images){
 function openModal(fileId){
   currentImageId = fileId;
   currentIndex = modalImageIds.indexOf(fileId);
-  modalImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
+  showModalImage(currentIndex);
   modal.style.display = "flex";
+}
+
+function showModalImage(index){
+  if(index < 0 || index >= modalImageIds.length) return;
+
+  currentIndex = index;
+  currentImageId = modalImageIds[index];
+  modalImg.src = `https://lh3.googleusercontent.com/d/${currentImageId}`;
 }
 
 modalCloseBar.onclick = ()=>{
@@ -260,10 +268,12 @@ modalCloseBar.onclick = ()=>{
 modalDownloadBar.onclick = ()=>{
   if(!currentImageId) return;
 
-  window.open(
-    `https://drive.google.com/uc?export=download&id=${currentImageId}`,
-    "_blank"
-  );
+  const link = document.createElement("a");
+  link.href = `https://lh3.googleusercontent.com/d/${currentImageId}`;
+  link.download = "photo.jpg";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 modal.onclick = e=>{
@@ -274,18 +284,45 @@ document.addEventListener("keydown", e=>{
   if(modal.style.display !== "flex") return;
 
   if(e.key === "ArrowRight"){
-    currentIndex = (currentIndex + 1) % modalImageIds.length;
-  }
-  if(e.key === "ArrowLeft"){
-    currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
-  }
-  if(e.key === "Escape"){
-    modal.style.display = "none";
-    return;
+    showModalImage((currentIndex + 1) % modalImageIds.length);
   }
 
-  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
+  if(e.key === "ArrowLeft"){
+    showModalImage(
+      (currentIndex - 1 + modalImageIds.length) % modalImageIds.length
+    );
+  }
+
+  if(e.key === "Escape"){
+    modal.style.display = "none";
+  }
 });
+
+let touchStartX = 0;
+let touchEndX = 0;
+
+modalImg.addEventListener("touchstart", e=>{
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+modalImg.addEventListener("touchend", e=>{
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+});
+
+function handleSwipe(){
+  const threshold = 50;
+
+  if(touchEndX < touchStartX - threshold){
+    showModalImage((currentIndex + 1) % modalImageIds.length);
+  }
+
+  if(touchEndX > touchStartX + threshold){
+    showModalImage(
+      (currentIndex - 1 + modalImageIds.length) % modalImageIds.length
+    );
+  }
+}
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
