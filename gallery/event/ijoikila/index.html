@@ -8,103 +8,98 @@
 <style>
 body{
   margin:0;
-  font-family:system-ui,sans-serif;
-  background:#fff;
-  color:#111;
+  font-family:system-ui, sans-serif;
+  background:#111;
+  color:#fff;
 }
 
-/* HEADER */
 header{
-  position:sticky;
-  top:0;
-  z-index:5;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:14px 16px;
-  border-bottom:1px solid #eee;
-  background:#fff;
+  padding:12px 16px;
 }
 
-header h1{font-size:14px;margin:0}
-header span{font-size:12px;color:#777}
-
-/* GALLERY */
-.gallery{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:4px;
-  padding:6px;
-}
-
-@media(min-width:600px){
-  .gallery{grid-template-columns:repeat(4,1fr)}
-}
-@media(min-width:1024px){
-  .gallery{grid-template-columns:repeat(6,1fr)}
-}
-
-.gallery img{
-  width:100%;
-  aspect-ratio:1/1;
-  object-fit:cover;
-  border-radius:4px;
-  cursor:pointer;
-}
-
-/* MODAL */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.92);
-  display:none;
-  flex-direction:column;
-  z-index:20;
-}
-
-.modal-top,
-.modal-bottom{
-  width:100%;
-  text-align:center;
-  color:#fff;
-  padding:14px 0;
+header h1{
   font-size:14px;
-  background:rgba(0,0,0,.6);
-  cursor:pointer;
-  user-select:none;
+  margin:0;
+  letter-spacing:1px;
 }
 
-.modal img{
-  max-width:95vw;
-  max-height:80vh;
-  object-fit:contain;
-  margin:auto;
-}
-
-.modal-close{
-  position:absolute;
-  top:14px;
-  right:16px;
-  font-size:26px;
-  color:#fff;
-  cursor:pointer;
-}
-
-body.modal-open{
-  overflow:hidden;
-  position:fixed;
-  width:100%;
-}
-
-  header button{
-  padding:6px 10px;
-  border:1px solid #ddd;
+button{
   background:#fff;
-  border-radius:6px;
+  color:#000;
+  border:0;
+  padding:6px 14px;
   font-size:12px;
   cursor:pointer;
 }
 
+.gallery{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  grid-auto-rows:110px; /* default mobile */
+  gap:8px;
+  padding:8px;
+}
+
+@media(min-width:768px){ /* desktop */
+  .gallery{
+    grid-auto-rows:120px;
+  }
+}
+
+.gallery img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  cursor:pointer;
+}
+
+/* Landscape → lebar + lebih tinggi */
+.gallery img.landscape{
+  grid-column:span 2;   /* lebar 2 column */
+  grid-row:span 2;      /* tinggi 2 row */
+}
+
+/* Portrait → tinggi 2 row */
+.gallery img.portrait{
+  grid-row:span 2;
+}
+
+footer{
+  text-align:center;
+  font-size:11px;
+  padding:12px;
+  opacity:.5;
+}
+
+/* ===== MODAL TOP/BOTTOM BAR ===== */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.9);
+  display:none;
+  flex-direction:column;
+  justify-content:space-between;
+  z-index:100;
+}
+
+.modal-bar{
+  background:rgba(0,0,0,.6);
+  text-align:center;
+  padding:14px;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.modal img{
+  max-width:95%;
+  max-height:80%;
+  margin:auto;
+}
+
+/* ===== SELECT MODE ===== */
 .img-wrapper{
   position:relative;
 }
@@ -124,75 +119,98 @@ body.modal-open{
 
 <header>
   <h1>FyLinx</h1>
-  <span>Ijoy & Kila</span>
+
+  <div style="display:flex; gap:8px; align-items:center;">
+    <span style="font-size:12px;">Ijoy & Kila</span>
     <div id="headerActions">
-    <button id="selectBtn">Select</button>
+      <button id="selectBtn">Select</button>
+    </div>
   </div>
 </header>
 
 <div class="gallery" id="gallery"></div>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
+<footer>© FyLinx</footer>
 
-  <!-- TOP BLACK BAR -->
-  <div class="modal-top" id="modalTop">
-    Click anywhere here to close
+<div class="modal" id="modal">
+  <div class="modal-bar" id="modalCloseBar">
+    Click here to close
   </div>
 
   <img id="modalImg">
 
-  <!-- BOTTOM BLACK BAR -->
-  <div class="modal-bottom" id="modalDownload">
+  <div class="modal-bar" id="modalDownloadBar">
     Download
   </div>
-
 </div>
 
 <script>
-const API_KEY = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
+const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 const FOLDER_ID = "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE";
-const PAGE_SIZE = 24;
+const PAGE_SIZE = 20;
 
+let nextPageToken = null;
 const gallery = document.getElementById("gallery");
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
 
-let nextPageToken = null;
-let loading = false;
-let finished = false;
-let scrollY = 0;
+let modalImageIds = [];
+let currentIndex = 0;
 
 let selectMode = false;
 let selectedIds = new Set();
 
-const selectBtn = document.getElementById("selectBtn");
 const headerActions = document.getElementById("headerActions");
+const selectBtn = document.getElementById("selectBtn");
 
-/* LOAD IMAGES */
+// ------------------- MORE button -------------------
+const moreBtn = document.createElement("button");
+moreBtn.textContent = "MORE";
+moreBtn.style.display = "block";
+moreBtn.style.margin = "16px auto";
+moreBtn.style.padding = "8px 16px";
+moreBtn.style.fontSize = "12px";
+gallery.after(moreBtn);
+
+// ------------------- util: extract number from filename -------------------
+function extractNumber(name){
+  // ambil nombor terakhir dalam nama (IMG_2024_2001.jpg → 2001)
+  const matches = name.match(/\d+/g);
+  return matches ? parseInt(matches[matches.length - 1], 10) : 0;
+}
+
+// ------------------- Load images -------------------
 async function loadNextImages(){
-  if(loading || finished) return;
-  loading = true;
-
   const query = encodeURIComponent(
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
   );
 
   let url =
-    `https://www.googleapis.com/drive/v3/files?q=${query}` +
-    `&orderBy=name desc&pageSize=${PAGE_SIZE}` +
-    `&fields=nextPageToken,files(id)` +
+    `https://www.googleapis.com/drive/v3/files?` +
+    `q=${query}` +
+    `&orderBy=name desc` + // paging stabil
+    `&pageSize=${PAGE_SIZE}` +
+    `&fields=nextPageToken,files(id,name)` +
     `&key=${API_KEY}`;
 
-  if(nextPageToken) url += `&pageToken=${nextPageToken}`;
+  if (nextPageToken) url += `&pageToken=${nextPageToken}`;
 
   const res = await fetch(url);
   const data = await res.json();
 
   nextPageToken = data.nextPageToken || null;
-  if(!nextPageToken) finished = true;
 
-data.files.forEach(file=>{
+  // 🔥 NATURAL SORT ikut nombor dalam nama (Z–A)
+  data.files
+    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name))
+    .forEach(file => addImage(file));
+}
+
+// ------------------- Add image -------------------
+function addImage(file){
+  if(document.getElementById(`img-${file.id}`)) return;
+
+  modalImageIds.push(file.id);
 
   const wrapper = document.createElement("div");
   wrapper.className = "img-wrapper";
@@ -204,19 +222,28 @@ data.files.forEach(file=>{
   checkbox.onchange = ()=>{
     if(checkbox.checked){
       selectedIds.add(file.id);
-    }else{
+    } else {
       selectedIds.delete(file.id);
     }
   };
 
   const img = document.createElement("img");
+  img.id = `img-${file.id}`;
   img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w500`;
+
+  img.onload = ()=>{
+    if(img.naturalWidth > img.naturalHeight){
+      img.classList.add("landscape");
+    } else {
+      img.classList.add("portrait");
+    }
+  };
 
   img.onclick = ()=>{
     if(selectMode){
       checkbox.checked = !checkbox.checked;
       checkbox.dispatchEvent(new Event("change"));
-    }else{
+    } else {
       openModal(file.id);
     }
   };
@@ -224,30 +251,40 @@ data.files.forEach(file=>{
   wrapper.appendChild(img);
   wrapper.appendChild(checkbox);
   gallery.appendChild(wrapper);
+}
+
+// ------------------- Modal -------------------
+function openModal(fileId){
+  currentIndex = modalImageIds.indexOf(fileId);
+  modalImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
+  modal.style.display = "flex";
+}
+
+modal.onclick = e=>{
+  if(e.target === modal) modal.style.display = "none";
+};
+
+document.addEventListener("keydown", e=>{
+  if(modal.style.display !== "flex") return;
+
+  if(e.key === "ArrowRight"){
+    currentIndex = (currentIndex + 1) % modalImageIds.length;
+  }
+  if(e.key === "ArrowLeft"){
+    currentIndex = (currentIndex - 1 + modalImageIds.length) % modalImageIds.length;
+  }
+  if(e.key === "Escape"){
+    modal.style.display = "none";
+    return;
+  }
+
+  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[currentIndex]}`;
 });
 
-  loading = false;
-  requestAnimationFrame(ensureScrollable);
-}
-
-  function ensureScrollable(){
-  if(
-    document.body.scrollHeight <= window.innerHeight &&
-    !loading &&
-    !finished
-  ){
-    loadNextImages();
-  }
-}
-
-  selectBtn.onclick = ()=>{
-
+selectBtn.onclick = ()=>{
   if(!selectMode){
     enterSelectMode();
-  }else{
-    downloadSelected();
   }
-
 };
 
 function enterSelectMode(){
@@ -255,7 +292,7 @@ function enterSelectMode(){
   selectedIds.clear();
 
   document.querySelectorAll(".img-checkbox")
-    .forEach(cb=>cb.style.display="block");
+    .forEach(cb => cb.style.display = "block");
 
   headerActions.innerHTML = `
     <button id="downloadBtn">Download</button>
@@ -273,15 +310,11 @@ function exitSelectMode(){
   document.querySelectorAll(".img-checkbox")
     .forEach(cb=>{
       cb.checked = false;
-      cb.style.display="none";
+      cb.style.display = "none";
     });
 
-  headerActions.innerHTML =
-    `<button id="selectBtn">Select</button>`;
-
-  document.getElementById("selectBtn").onclick = ()=>{
-    enterSelectMode();
-  };
+  headerActions.innerHTML = `<button id="selectBtn">Select</button>`;
+  document.getElementById("selectBtn").onclick = enterSelectMode;
 }
 
 function downloadSelected(){
@@ -296,61 +329,36 @@ function downloadSelected(){
 
   exitSelectMode();
 }
-  
-/* SCROLL INFINITE LOAD */
-window.addEventListener("scroll",()=>{
-  const scrollBottom =
-    window.innerHeight + window.scrollY >=
-    document.body.offsetHeight - 800;
 
-  if(scrollBottom){
-    loadNextImages();
-  }
-});
+const modalCloseBar = document.getElementById("modalCloseBar");
+const modalDownloadBar = document.getElementById("modalDownloadBar");
 
-const modalTop = document.getElementById("modalTop");
-const modalDownload = document.getElementById("modalDownload");
 let currentImageId = null;
 
-  modalTop.onclick = closeModal;
+function openModal(fileId){
+  currentImageId = fileId;
+  currentIndex = modalImageIds.indexOf(fileId);
+  modalImg.src = `https://lh3.googleusercontent.com/d/${fileId}`;
+  modal.style.display = "flex";
+}
 
-modalDownload.onclick = ()=>{
+modalCloseBar.onclick = ()=>{
+  modal.style.display = "none";
+};
+
+modalDownloadBar.onclick = ()=>{
   if(!currentImageId) return;
   window.open(
     `https://drive.google.com/uc?export=download&id=${currentImageId}`,
     "_blank"
   );
 };
-  
-/* MODAL */
-function openModal(id){
-  currentImageId = id;
 
-  scrollY = window.scrollY;
-  document.body.classList.add("modal-open");
-  document.body.style.top = `-${scrollY}px`;
-
-  modalImg.src = `https://lh3.googleusercontent.com/d/${id}`;
-  modal.style.display = "flex";
-}
-
-function closeModal(){
-  modal.style.display = "none";
-  modalImg.src = "";
-
-  document.body.classList.remove("modal-open");
-  document.body.style.top = "";
-  window.scrollTo(0, scrollY);
-}
-
-modal.addEventListener("click",e=>{
-  if(e.target === modal) closeModal();
-});
-
-/* INIT */
+// ------------------- Init -------------------
+moreBtn.onclick = loadNextImages;
 loadNextImages();
-requestAnimationFrame(ensureScrollable);
 </script>
+
 
 </body>
 </html>
