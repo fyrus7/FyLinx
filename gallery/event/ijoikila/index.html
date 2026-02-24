@@ -335,22 +335,28 @@ document.addEventListener("keydown", e=>{
 let touchStartX = 0;
 let touchEndX = 0;
 
+modalImg.addEventListener("touchstart", e=>{
+  touchStartX = e.touches[0].clientX;
+});
+
 modalImg.addEventListener("touchend", e=>{
-  touchEndX = e.changedTouches[0].screenX;
+  touchEndX = e.changedTouches[0].clientX;
   handleSwipe();
 });
 
 function handleSwipe(){
-  const threshold = 50;
+  const threshold = 60; // boleh adjust
 
-  if(touchEndX < touchStartX - threshold){
-    showModalImage((currentIndex + 1) % modalImageIds.length);
-  }
-
-  if(touchEndX > touchStartX + threshold){
+  if(touchEndX - touchStartX > threshold){
+    // swipe right
     showModalImage(
       (currentIndex - 1 + modalImageIds.length) % modalImageIds.length
     );
+  }
+
+  if(touchStartX - touchEndX > threshold){
+    // swipe left
+    showModalImage((currentIndex + 1) % modalImageIds.length);
   }
 }
 
