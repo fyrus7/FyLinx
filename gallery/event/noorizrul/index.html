@@ -150,6 +150,7 @@ const modalImg = document.getElementById("modalImg");
 
 let modalImageIds = [];
 let currentIndex = 0;
+const loadedImageSet = new Set();
   
 // ------------------- MORE button -------------------
 const moreBtn = document.createElement("button");
@@ -188,6 +189,10 @@ async function loadNextImages(){
 
   nextPageToken = data.nextPageToken || null;
 
+  if(!nextPageToken){
+    moreBtn.style.display = "none";
+  }
+
   // 🔥 NATURAL SORT ikut nombor dalam nama (Z–A)
   const sorted = data.files
     .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
@@ -214,10 +219,20 @@ function addImages(files){
   }));
 
   Promise.all(preload).then(images=>{
-    images.forEach(img => modalImageIds.push(img.id));
-    loadedImages = loadedImages.concat(images);
-    renderJustified(images);
+
+  // filter gambar yang belum pernah load
+  const newImages = images.filter(img => {
+    if(loadedImageSet.has(img.id)) return false;
+    loadedImageSet.add(img.id);
+    return true;
   });
+
+  if(newImages.length === 0) return;
+
+  newImages.forEach(img => modalImageIds.push(img.id));
+  loadedImages = loadedImages.concat(newImages);
+  renderJustified(newImages);
+});
 }
 
 
