@@ -157,7 +157,6 @@ const PAGE_SIZE = 24;
 const gallery = document.getElementById("gallery");
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
-const modalClose = document.getElementById("modalClose");
 
 let nextPageToken = null;
 let loading = false;
@@ -344,7 +343,6 @@ function closeModal(){
   window.scrollTo(0, scrollY);
 }
 
-modalClose.onclick = closeModal;
 modal.addEventListener("click",e=>{
   if(e.target === modal) closeModal();
 });
