@@ -317,17 +317,19 @@ function exitSelectMode(){
   document.getElementById("selectBtn").onclick = enterSelectMode;
 }
 
-function downloadSelected(){
+async function downloadSelected(){
   if(selectedIds.size === 0) return;
 
-  selectedIds.forEach(id=>{
+  for(const id of selectedIds){
     const link = document.createElement("a");
     link.href = `https://drive.google.com/uc?export=download&id=${id}`;
     link.download = "";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  });
+
+    await new Promise(r=>setTimeout(r,300));
+  }
 
   exitSelectMode();
 }
