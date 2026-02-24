@@ -142,6 +142,12 @@ footer{
   transform: translateX(-100%);
   opacity: 0;
 }
+
+body.modal-open{
+  position:fixed;
+  width:100%;
+  overflow:hidden;
+}
 </style>
 </head>
 
@@ -180,6 +186,7 @@ const modalImg = document.getElementById("modalImg");
 
 let modalImageIds = [];
 let currentIndex = 0;
+let scrollY = 0;
 
 const modalCloseBar = document.getElementById("modalCloseBar");
   
@@ -301,8 +308,15 @@ function renderJustified(images){
 
 // ------------------- Modal -------------------
 function openModal(fileId){
+
   currentIndex = modalImageIds.indexOf(fileId);
   showModalImage(currentIndex);
+
+  scrollY = window.scrollY;
+
+  document.body.classList.add("modal-open");
+  document.body.style.top = `-${scrollY}px`;
+
   modal.style.display = "flex";
 }
 
@@ -334,13 +348,19 @@ function showModalImage(newIndex){
   }, 300);
 }
 
-modalCloseBar.onclick = ()=>{
-  modal.style.display = "none";
-};
+modal.addEventListener("click", e=>{
+  // kalau klik bukan pada content (image + arrow)
+  if(!e.target.closest(".modal-content")){
+    closeModal();
+  }
+});
 
-modal.onclick = e=>{
-  if(e.target === modal) modal.style.display = "none";
-};
+function closeModal(){
+  modal.style.display = "none";
+  document.body.classList.remove("modal-open");
+  document.body.style.top = "";
+  window.scrollTo(0, scrollY);
+}
 
 document.addEventListener("keydown", e=>{
   if(modal.style.display !== "flex") return;
