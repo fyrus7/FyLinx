@@ -85,6 +85,39 @@ footer{
   max-height:80%;
   margin:auto;
 }
+
+.modal-content{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:1;
+}
+
+.modal-arrow{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:28px;
+  color:#fff;
+  cursor:pointer;
+  padding:10px;
+  user-select:none;
+  opacity:0.7;
+  transition:opacity 0.2s ease;
+}
+
+.modal-arrow:hover{
+  opacity:1;
+}
+
+#modalPrev{
+  left:10px;
+}
+
+#modalNext{
+  right:10px;
+}
 </style>
 </head>
 
@@ -104,10 +137,10 @@ footer{
     Click here to close
   </div>
 
-  <img id="modalImg">
-
-  <div class="modal-bar" id="modalDownloadBar">
-    Download
+  <div class="modal-content">
+    <div class="modal-arrow" id="modalPrev">&#10094;</div>
+    <img id="modalImg">
+    <div class="modal-arrow" id="modalNext">&#10095;</div>
   </div>
 </div>
 
@@ -125,9 +158,6 @@ let modalImageIds = [];
 let currentIndex = 0;
 
 const modalCloseBar = document.getElementById("modalCloseBar");
-const modalDownloadBar = document.getElementById("modalDownloadBar");
-
-let currentImageId = null;
   
 // ------------------- MORE button -------------------
 const moreBtn = document.createElement("button");
@@ -247,7 +277,6 @@ function renderJustified(images){
 
 // ------------------- Modal -------------------
 function openModal(fileId){
-  currentImageId = fileId;
   currentIndex = modalImageIds.indexOf(fileId);
   showModalImage(currentIndex);
   modal.style.display = "flex";
@@ -257,23 +286,11 @@ function showModalImage(index){
   if(index < 0 || index >= modalImageIds.length) return;
 
   currentIndex = index;
-  currentImageId = modalImageIds[index];
-  modalImg.src = `https://lh3.googleusercontent.com/d/${currentImageId}`;
+  modalImg.src = `https://lh3.googleusercontent.com/d/${modalImageIds[index]}`;
 }
 
 modalCloseBar.onclick = ()=>{
   modal.style.display = "none";
-};
-
-modalDownloadBar.onclick = ()=>{
-  if(!currentImageId) return;
-
-  const link = document.createElement("a");
-  link.href = `https://lh3.googleusercontent.com/d/${currentImageId}`;
-  link.download = "photo.jpg";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 };
 
 modal.onclick = e=>{
@@ -323,6 +340,21 @@ function handleSwipe(){
     );
   }
 }
+
+const modalPrev = document.getElementById("modalPrev");
+const modalNext = document.getElementById("modalNext");
+
+modalPrev.onclick = ()=>{
+  showModalImage(
+    (currentIndex - 1 + modalImageIds.length) % modalImageIds.length
+  );
+};
+
+modalNext.onclick = ()=>{
+  showModalImage(
+    (currentIndex + 1) % modalImageIds.length
+  );
+};
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
