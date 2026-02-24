@@ -35,34 +35,21 @@ button{
   cursor:pointer;
 }
 
-.gallery{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;
-  padding:8px;
+#imageGrid{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  max-width:95%;
+  margin:0 auto;
 }
 
-@media(min-width:768px){
-  .gallery{
-    grid-template-columns:repeat(3,1fr);
-  }
-}
-
-@media(min-width:1200px){
-  .gallery{
-    grid-template-columns:repeat(5,1fr);
-  }
-}
-
-@media(min-width:1600px){
-  .gallery{
-    grid-template-columns:repeat(6,1fr);
-  }
-}
-
-.gallery img{
+.row{
+  display:flex;
+  gap:6px;
   width:100%;
-  height:100%;
+}
+
+.row img{
   object-fit:cover;
   cursor:pointer;
 }
@@ -108,7 +95,7 @@ footer{
   <span style="font-size:12px; color:#fff; margin-left: auto;">Ijoy & Kila</span>
 </header>
 
-<div class="gallery" id="gallery"></div>
+<div id="imageGrid"></div>
 
 <footer>© FyLinx</footer>
 
@@ -180,44 +167,81 @@ async function loadNextImages(){
   nextPageToken = data.nextPageToken || null;
 
   // 🔥 NATURAL SORT ikut nombor dalam nama (Z–A)
-  data.files
-    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name))
-    .forEach(file => addImage(file));
+  const sorted = data.files
+    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
+  
+  addImages(sorted);
 }
 
 // ------------------- Add image -------------------
-function addImage(file){
+let loadedImages = [];
 
-  if(document.getElementById(`img-${file.id}`)) return;
+function addImages(files){
 
-  const img = document.createElement("img");
-  img.id = `img-${file.id}`;
-  img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
+  const preload = files.map(file => new Promise(resolve=>{
+    const img = new Image();
+    img.onload = ()=>{
+      resolve({
+        id: file.id,
+        thumb: `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`,
+        full: `https://lh3.googleusercontent.com/d/${file.id}`,
+        ratio: img.naturalWidth / img.naturalHeight
+      });
+    };
+    img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
+  }));
 
-  const index = gallery.children.length;
-  const pattern = index % 6;
+  Promise.all(preload).then(images=>{
+    loadedImages = loadedImages.concat(images);
+    renderJustified(images);
+  });
+}
 
-  /*
-    Pattern 6 repeat:
-    0 → big (2x2)
-    1 → normal
-    2 → normal
-    3 → wide (2x1)
-    4 → normal
-    5 → normal
-  */
 
-  if(pattern === 0){
-    img.style.gridColumn = "span 2";
-    img.style.gridRow = "span 2";
+function renderJustified(images){
+
+  const container = document.getElementById("imageGrid");
+  const TARGET_ROW_HEIGHT = 220;
+  const containerWidth = container.clientWidth;
+
+  let row = [];
+  let rowWidth = 0;
+
+  function addRow(row, rowWidth){
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "row";
+
+    const scale = containerWidth / rowWidth;
+
+    row.forEach(item=>{
+      const img = document.createElement("img");
+      img.src = item.thumb;
+      img.style.height = `${TARGET_ROW_HEIGHT * scale}px`;
+      img.style.width = `${TARGET_ROW_HEIGHT * scale * item.ratio}px`;
+
+      img.onclick = ()=>openModal(item.id);
+
+      rowDiv.appendChild(img);
+    });
+
+    container.appendChild(rowDiv);
   }
-  else if(pattern === 3){
-    img.style.gridColumn = "span 2";
+
+  images.forEach(img=>{
+    const scaledWidth = img.ratio * TARGET_ROW_HEIGHT;
+    row.push(img);
+    rowWidth += scaledWidth;
+
+    if(rowWidth >= containerWidth){
+      addRow(row, rowWidth);
+      row = [];
+      rowWidth = 0;
+    }
+  });
+
+  if(row.length){
+    addRow(row, rowWidth);
   }
-
-  img.onclick = ()=>openModal(file.id);
-
-  gallery.appendChild(img);
 }
 
 // ------------------- Modal -------------------
