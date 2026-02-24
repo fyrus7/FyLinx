@@ -69,54 +69,14 @@ footer{
   display:none;
   flex-direction:column;
   justify-content:space-between;
+  align-items:center;
   z-index:100;
-}
-
-.modal-bar{
-  background:rgba(0,0,0,.6);
-  text-align:center;
-  padding:14px;
-  font-size:13px;
-  cursor:pointer;
 }
 
 .modal img{
   max-width:95%;
-  max-height:80%;
+  max-height:85%;
   margin:auto;
-}
-
-.modal-content{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  flex:1;
-}
-
-.modal-arrow{
-  position:absolute;
-  top:50%;
-  transform:translateY(-50%);
-  font-size:28px;
-  color:#fff;
-  cursor:pointer;
-  padding:10px;
-  user-select:none;
-  opacity:0.7;
-  transition:opacity 0.2s ease;
-}
-
-.modal-arrow:hover{
-  opacity:1;
-}
-
-#modalPrev{
-  left:10px;
-}
-
-#modalNext{
-  right:10px;
 }
 
 #modalImg{
@@ -157,15 +117,11 @@ footer{
 <footer>© FyLinx</footer>
 
 <div class="modal" id="modal">
-  <div class="modal-bar" id="modalCloseBar">
-    Click here to close
+  <div class="modal-bar">
+    Tap on black area to close
   </div>
 
-  <div class="modal-content">
-    <div class="modal-arrow" id="modalPrev">&#10094;</div>
-    <img id="modalImg">
-    <div class="modal-arrow" id="modalNext">&#10095;</div>
-  </div>
+  <img id="modalImg">
 </div>
 
 <script>
@@ -366,8 +322,10 @@ document.addEventListener("keydown", e=>{
 let touchStartX = 0;
 let touchEndX = 0;
 
-modalImg.addEventListener("touchstart", e=>{
-  touchStartX = e.changedTouches[0].screenX;
+modal.addEventListener("click", e=>{
+  if(e.target !== modalImg){
+    modal.style.display = "none";
+  }
 });
 
 modalImg.addEventListener("touchend", e=>{
@@ -388,21 +346,6 @@ function handleSwipe(){
     );
   }
 }
-
-const modalPrev = document.getElementById("modalPrev");
-const modalNext = document.getElementById("modalNext");
-
-modalPrev.onclick = ()=>{
-  showModalImage(
-    (currentIndex - 1 + modalImageIds.length) % modalImageIds.length
-  );
-};
-
-modalNext.onclick = ()=>{
-  showModalImage(
-    (currentIndex + 1) % modalImageIds.length
-  );
-};
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
