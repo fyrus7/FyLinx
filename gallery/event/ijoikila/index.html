@@ -110,6 +110,11 @@ footer{
   transform: translateX(-100%);
   opacity: 0;
 }
+
+body.modal-open{
+  overflow: hidden;
+  height: 100vh;
+}
 </style>
 </head>
 
@@ -128,8 +133,8 @@ footer{
   <img id="modalImg">
 
   <div class="modal-info">
-    <div>Hold photo to save</div>
-    <div>Tap outside image to close</div>
+    <div>Hold to download image</div>
+    <div>Tap black area to close</div>
   </div>
 </div>
 
@@ -267,6 +272,8 @@ function openModal(fileId){
   currentIndex = modalImageIds.indexOf(fileId);
   showModalImage(currentIndex);
   modal.style.display = "flex";
+
+  document.body.classList.add("modal-open");
 }
 
 function showModalImage(newIndex){
@@ -311,6 +318,7 @@ function showModalImage(newIndex){
 modal.addEventListener("click", e=>{
   if(e.target !== modalImg){
     modal.style.display = "none";
+    document.body.classList.remove("modal-open");
   }
 });
 
@@ -329,6 +337,7 @@ document.addEventListener("keydown", e=>{
 
   if(e.key === "Escape"){
     modal.style.display = "none";
+    document.body.classList.remove("modal-open");
   }
 });
 
