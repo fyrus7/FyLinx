@@ -321,10 +321,12 @@ function downloadSelected(){
   if(selectedIds.size === 0) return;
 
   selectedIds.forEach(id=>{
-    window.open(
-      `https://drive.google.com/uc?export=download&id=${id}`,
-      "_blank"
-    );
+    const link = document.createElement("a");
+    link.href = `https://drive.google.com/uc?export=download&id=${id}`;
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   });
 
   exitSelectMode();
