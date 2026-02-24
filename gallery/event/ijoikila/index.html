@@ -83,6 +83,14 @@ footer{
   transition: transform 0.35s ease, opacity 0.35s ease;
 }
 
+.modal-info{
+  text-align:center;
+  padding:16px 20px 22px;
+  font-size:13px;
+  opacity:0.8;
+  line-height:1.6;
+}
+
 .slide-out-left{
   transform: translateX(-100%);
   opacity: 0;
@@ -117,11 +125,12 @@ footer{
 <footer>© FyLinx</footer>
 
 <div class="modal" id="modal">
-  <div class="modal-bar">
-    Tap on black area to close
-  </div>
-
   <img id="modalImg">
+
+  <div class="modal-info">
+    <div>Hold photo to save</div>
+    <div>Tap outside image to close</div>
+  </div>
 </div>
 
 <script>
