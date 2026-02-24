@@ -136,8 +136,6 @@ const modalImg = document.getElementById("modalImg");
 
 let modalImageIds = [];
 let currentIndex = 0;
-
-const modalCloseBar = document.getElementById("modalCloseBar");
   
 // ------------------- MORE button -------------------
 const moreBtn = document.createElement("button");
@@ -290,13 +288,8 @@ function showModalImage(newIndex){
   }, 300);
 }
 
-modalCloseBar.onclick = ()=>{
-  modal.style.display = "none";
-};
-
 modal.addEventListener("click", e=>{
-  // kalau klik bukan pada image atau arrow
-  if(!e.target.closest(".modal-content")){
+  if(e.target !== modalImg){
     modal.style.display = "none";
   }
 });
@@ -321,12 +314,6 @@ document.addEventListener("keydown", e=>{
 
 let touchStartX = 0;
 let touchEndX = 0;
-
-modal.addEventListener("click", e=>{
-  if(e.target !== modalImg){
-    modal.style.display = "none";
-  }
-});
 
 modalImg.addEventListener("touchend", e=>{
   touchEndX = e.changedTouches[0].screenX;
