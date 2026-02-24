@@ -271,9 +271,20 @@ function openModal(fileId){
 
 function showModalImage(newIndex){
 
-  if(newIndex < 0 || newIndex >= modalImageIds.length) return;
+  const total = modalImageIds.length;
 
-  const direction = newIndex > currentIndex ? "right" : "left";
+  if(newIndex < 0) newIndex = total - 1;
+  if(newIndex >= total) newIndex = 0;
+
+  const diff = newIndex - currentIndex;
+
+  let direction;
+
+  if(diff === 1 || diff === -(total - 1)){
+    direction = "right";
+  } else {
+    direction = "left";
+  }
 
   modalImg.classList.add(
     direction === "right" ? "slide-out-left" : "slide-out-right"
