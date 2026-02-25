@@ -35,6 +35,22 @@ button{
   cursor:pointer;
   border-radius: 5px;
 }
+.btn-dark{
+  background:transparent;
+  color:#fff;
+  border:1px solid rgba(255,255,255,.3);
+  padding:6px 16px;
+  border-radius:20px;
+  transition:background .2s ease, opacity .2s ease;
+}
+
+.btn-dark:hover{
+  background:rgba(255,255,255,.1);
+}
+
+.btn-dark:disabled{
+  opacity:.5;
+}
 
 #imageGrid{
   display:flex;
@@ -179,8 +195,8 @@ img.selected{
 <div id="multiBar">
   <span id="multiCount">0 </span>
   <div style="display:flex; gap:10px;">
-    <button id="multiDownload">Download</button>
-    <button id="multiCancel">X</button>
+    <button id="multiDownload" class="btn-dark">Download</button>
+    <button id="multiCancel" class="btn-dark">X</button>
   </div>
 </div>
 
@@ -188,7 +204,7 @@ img.selected{
   <img id="modalImg">
 
   <div class="modal-info">
-    <button id="downloadBtn" style="margin-bottom:10px;">Download</button>
+    <button id="downloadBtn" class="btn-dark">Download</button>
     <div>Swipe left / right</div>
     <div>Tap outside to close</div>
   </div>
@@ -276,6 +292,7 @@ downloadBtn.addEventListener("click", e=>{
 });
 // ------------------- MORE button -------------------
 const moreBtn = document.createElement("button");
+moreBtn.classList.add("btn-dark");
 moreBtn.textContent = "MORE";
 moreBtn.style.display = "block";
 moreBtn.style.margin = "16px auto";
