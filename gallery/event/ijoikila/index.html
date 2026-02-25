@@ -396,7 +396,7 @@ function renderJustified(images){
           img.classList.add("selected");
         }
         
-        multiCount.textContent = `${selectedIds.size} selected`;
+        multiCount.textContent = selectedIds.size;
       };
 
       rowDiv.appendChild(img);
@@ -576,7 +576,7 @@ selectBtn.onclick = ()=>{
 
   selectBtn.style.display = "none";
   multiBar.style.display = "flex";
-  multiCount.textContent = "0 ";
+  multiCount.textContent = 0;
 };
 
 function exitMultiMode(){
