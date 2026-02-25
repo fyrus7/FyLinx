@@ -143,14 +143,8 @@ img.selected{
 }
 
 #multiBar button{
-  background:transparent;
+  background:#00aaff;
   color:#fff;
-  border:1px solid rgba(255,255,255,.3);
-  transition:background .2s ease;
-}
-
-#multiBar button:hover{
-  background:rgba(255,255,255,.1);
 }
 
 .header-right{
@@ -583,7 +577,7 @@ async function downloadMultiple(){
     }
   }
 
-  multiDownload.textContent = "Downloaded ✓";
+  multiDownload.textContent = "Done ✓";
 
   setTimeout(()=>{
     multiDownload.textContent = "Download";
@@ -602,8 +596,6 @@ selectBtn.onclick = ()=>{
   selectBtn.style.display = "none";
   multiBar.style.display = "flex";
   multiCount.textContent = 0;
-
-  moreBtn.style.display = "none";
 };
 
 function exitMultiMode(){
