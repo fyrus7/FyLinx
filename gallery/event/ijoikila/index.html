@@ -171,17 +171,21 @@ const loadedImageSet = new Set();
 async function downloadCurrentImage(){
 
   const fileId = modalImageIds[currentIndex];
-  const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
+  const fileName = loadedImages[currentIndex]?.name || "photo.jpg";
+
+  const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
 
   try{
-    const response = await fetch(url);
-    const blob = await response.blob();
 
+    const response = await fetch(url);
+    if(!response.ok) throw new Error("Network error");
+
+    const blob = await response.blob();
     const blobUrl = window.URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = blobUrl;
-    a.download = "photo.jpg"; // boleh letak nama custom
+    a.download = fileName;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -266,6 +270,7 @@ function addImages(files){
     img.onload = ()=>{
       resolve({
         id: file.id,
+        name: file.name,
         thumb: `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`,
         full: `https://lh3.googleusercontent.com/d/${file.id}`,
         ratio: img.naturalWidth / img.naturalHeight
