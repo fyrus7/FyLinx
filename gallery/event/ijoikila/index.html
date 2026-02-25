@@ -243,7 +243,6 @@ let isLoading = false;
 const gallery = document.getElementById("imageGrid");
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
-const selectBtn = document.getElementById("selectBtn");
 let selectMode = false;
 let selectedIds = new Set();
 const downloadBtn = document.getElementById("downloadBtn");
@@ -252,9 +251,6 @@ const multiBar = document.getElementById("multiBar");
 const multiDownload = document.getElementById("multiDownload");
 const multiCancel = document.getElementById("multiCancel");
 const multiCount = document.getElementById("multiCount");
-
-let selectMode = false;
-let selectedIds = new Set();
 
 let modalImageIds = [];
 let currentIndex = 0;
@@ -582,103 +578,6 @@ function handleSwipe(){
   }
 }
 
-// ------- multi download -------
-async function downloadMultiple(){
-
-  selectBtn.disabled = true;
-
-  const total = selectedIds.size;
-  let current = 0;
-
-  for(const fileId of selectedIds){
-
-    current++;
-    selectBtn.textContent = `Downloading (${current} / ${total})`;
-
-    const fileData = loadedImages.find(img => img.id === fileId);
-    const fileName = fileData?.name || "photo.jpg";
-
-    const wrapper = [...document.querySelectorAll(".thumb-wrapper")]
-      .find(w => w.querySelector("img")?.src.includes(fileId));
-
-    const ring = createProgressRing();
-    wrapper.appendChild(ring.container);
-
-    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
-
-    try{
-
-      const response = await fetch(url);
-      const reader = response.body.getReader();
-      const contentLength = +response.headers.get("Content-Length");
-
-      let received = 0;
-
-      while(true){
-        const {done, value} = await reader.read();
-        if(done) break;
-        received += value.length;
-
-        const percent = received / contentLength;
-        const offset = 126 - (126 * percent);
-        ring.circle.style.strokeDashoffset = offset;
-      }
-
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      URL.revokeObjectURL(blobUrl);
-
-      wrapper.classList.add("done");
-      wrapper.removeChild(ring.container);
-
-      await new Promise(r => setTimeout(r, 300));
-
-    }catch(err){
-      console.error("Fail:", fileId);
-    }
-  }
-
-  selectBtn.textContent = "Downloaded ✓";
-
-  setTimeout(()=>{
-    selectBtn.textContent = "Select";
-    selectBtn.disabled = false;
-    selectedIds.clear();
-    selectMode = false;
-
-    document.querySelectorAll(".thumb-wrapper")
-      .forEach(w=>{
-        w.classList.remove("selected","done");
-      });
-
-  },1500);
-}
-
-selectBtn.onclick = ()=>{
-
-  if(!selectMode){
-    selectMode = true;
-    selectedIds.clear();
-    selectBtn.textContent = "Download (0)";
-    return;
-  }
-
-  if(selectedIds.size === 0){
-    selectMode = false;
-    selectBtn.textContent = "Select";
-    return;
-  }
-
-  downloadMultiple();
-};
 
 function createProgressRing(){
 
