@@ -55,48 +55,6 @@ button{
   cursor:pointer;
 }
 
-.thumb-wrapper{
-  position:relative;
-}
-
-.thumb-wrapper .progress-ring{
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  pointer-events:none;
-}
-
-.progress-ring svg{
-  width:50px;
-  height:50px;
-  transform:rotate(-90deg);
-}
-
-.progress-ring circle{
-  fill:none;
-  stroke:#00aaff;
-  stroke-width:4;
-  stroke-linecap:round;
-  stroke-dasharray:126;
-  stroke-dashoffset:126;
-  transition:stroke-dashoffset .3s ease;
-}
-
-.thumb-wrapper.done::after{
-  content:"✓";
-  position:absolute;
-  inset:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
-  font-weight:bold;
-  color:#00ff88;
-  background:rgba(0,0,0,.5);
-}
-
 footer{
   text-align:center;
   font-size:11px;
@@ -164,10 +122,6 @@ button:disabled{
 }
 
 img.selected{
-  outline:3px solid #00aaff;
-  opacity:.6;
-}
-.thumb-wrapper.selected img{
   outline:3px solid #00aaff;
   opacity:.6;
 }
@@ -383,46 +337,40 @@ function renderJustified(images){
   let rowWidth = 0;
 
   function addRow(row, rowWidth){
-  const rowDiv = document.createElement("div");
-  rowDiv.className = "row";
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "row";
 
-  const scale = containerWidth / rowWidth;
+    const scale = containerWidth / rowWidth;
 
-  row.forEach(item=>{
+    row.forEach(item=>{
+      const img = document.createElement("img");
+      img.src = item.thumb;
+      img.style.height = `${TARGET_ROW_HEIGHT * scale}px`;
+      img.style.width = `${TARGET_ROW_HEIGHT * scale * item.ratio}px`;
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "thumb-wrapper";
+      img.onclick = ()=>{
 
-    const img = document.createElement("img");
-    img.src = item.thumb;
-    img.style.height = `${TARGET_ROW_HEIGHT * scale}px`;
-    img.style.width = `${TARGET_ROW_HEIGHT * scale * item.ratio}px`;
+        if(!selectMode){
+          openModal(item.id);
+          return;
+        }
+        
+        if(selectedIds.has(item.id)){
+          selectedIds.delete(item.id);
+          img.classList.remove("selected");
+        }else{
+          selectedIds.add(item.id);
+          img.classList.add("selected");
+        }
+        
+        selectBtn.textContent = `Download (${selectedIds.size})`;
+      };
 
-    img.onclick = ()=>{
+      rowDiv.appendChild(img);
+    });
 
-      if(!selectMode){
-        openModal(item.id);
-        return;
-      }
-
-      if(selectedIds.has(item.id)){
-        selectedIds.delete(item.id);
-        wrapper.classList.remove("selected");
-      }else{
-        selectedIds.add(item.id);
-        wrapper.classList.add("selected");
-      }
-
-      selectBtn.textContent = `Download (${selectedIds.size})`;
-    };
-
-    wrapper.appendChild(img);
-    rowDiv.appendChild(wrapper);
-
-  });
-
-  container.appendChild(rowDiv);
-}
+    container.appendChild(rowDiv);
+  }
 
   images.forEach(img=>{
     const scaledWidth = img.ratio * TARGET_ROW_HEIGHT;
@@ -547,46 +495,19 @@ function handleSwipe(){
 async function downloadMultiple(){
 
   selectBtn.disabled = true;
-
-  const total = selectedIds.size;
-  let current = 0;
+  selectBtn.textContent = "Downloading...";
 
   for(const fileId of selectedIds){
-
-    current++;
-    selectBtn.textContent = `Downloading (${current} / ${total})`;
 
     const fileData = loadedImages.find(img => img.id === fileId);
     const fileName = fileData?.name || "photo.jpg";
 
-    const wrapper = [...document.querySelectorAll(".thumb-wrapper")]
-      .find(w => w.querySelector("img")?.src.includes(fileId));
-
-    const ring = createProgressRing();
-    wrapper.appendChild(ring.container);
-
     const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
 
     try{
-
       const response = await fetch(url);
-      const reader = response.body.getReader();
-      const contentLength = +response.headers.get("Content-Length");
-
-      let received = 0;
-
-      while(true){
-        const {done, value} = await reader.read();
-        if(done) break;
-        received += value.length;
-
-        const percent = received / contentLength;
-        const offset = 126 - (126 * percent);
-        ring.circle.style.strokeDashoffset = offset;
-      }
-
       const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
+      const blobUrl = window.URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = blobUrl;
@@ -595,15 +516,13 @@ async function downloadMultiple(){
       a.click();
       document.body.removeChild(a);
 
-      URL.revokeObjectURL(blobUrl);
+      window.URL.revokeObjectURL(blobUrl);
 
-      wrapper.classList.add("done");
-      wrapper.removeChild(ring.container);
-
-      await new Promise(r => setTimeout(r, 300));
+      // delay sikit supaya mobile stabil
+      await new Promise(r => setTimeout(r, 500));
 
     }catch(err){
-      console.error("Fail:", fileId);
+      console.error("Failed:", fileId);
     }
   }
 
@@ -613,13 +532,12 @@ async function downloadMultiple(){
     selectBtn.textContent = "Select";
     selectBtn.disabled = false;
     selectedIds.clear();
+
+    document.querySelectorAll(".selected").forEach(el=>{
+      el.classList.remove("selected");
+    });
+
     selectMode = false;
-
-    document.querySelectorAll(".thumb-wrapper")
-      .forEach(w=>{
-        w.classList.remove("selected","done");
-      });
-
   },1500);
 }
 
@@ -641,21 +559,6 @@ selectBtn.onclick = ()=>{
   downloadMultiple();
 };
 
-function createProgressRing(){
-
-  const container = document.createElement("div");
-  container.className = "progress-ring";
-
-  container.innerHTML = `
-    <svg viewBox="0 0 50 50">
-      <circle cx="25" cy="25" r="20"></circle>
-    </svg>
-  `;
-
-  const circle = container.querySelector("circle");
-
-  return { container, circle };
-}
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
 loadNextImages();
