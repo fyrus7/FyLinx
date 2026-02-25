@@ -120,6 +120,11 @@ button:disabled{
   opacity:0.6;
   cursor:default;
 }
+
+img.selected{
+  outline:3px solid #00aaff;
+  opacity:.6;
+}
 </style>
 </head>
 
@@ -127,7 +132,11 @@ button:disabled{
 
 <header>
   <h1>FyLinx</h1>
-  <span style="font-size:12px; color:#fff; margin-left: auto;">Ijoy & Kila</span>
+
+  <div style="display:flex; gap:8px; align-items:center;">
+    <button id="selectBtn">Select</button>
+    <span style="font-size:12px; color:#fff;">Ijoy & Kila</span>
+  </div>
 </header>
 
 <div id="imageGrid"></div>
@@ -161,6 +170,9 @@ let isLoading = false;
 const gallery = document.getElementById("imageGrid");
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
+const selectBtn = document.getElementById("selectBtn");
+let selectMode = false;
+let selectedIds = new Set();
 const downloadBtn = document.getElementById("downloadBtn");
 
 let modalImageIds = [];
@@ -336,7 +348,23 @@ function renderJustified(images){
       img.style.height = `${TARGET_ROW_HEIGHT * scale}px`;
       img.style.width = `${TARGET_ROW_HEIGHT * scale * item.ratio}px`;
 
-      img.onclick = ()=>openModal(item.id);
+      img.onclick = ()=>{
+
+        if(!selectMode){
+          openModal(item.id);
+          return;
+        }
+        
+        if(selectedIds.has(item.id)){
+          selectedIds.delete(item.id);
+          img.classList.remove("selected");
+        }else{
+          selectedIds.add(item.id);
+          img.classList.add("selected");
+        }
+        
+        selectBtn.textContent = `Download (${selectedIds.size})`;
+      };
 
       rowDiv.appendChild(img);
     });
@@ -462,6 +490,74 @@ function handleSwipe(){
     showModalImage((currentIndex + 1) % modalImageIds.length);
   }
 }
+
+// ------- multi download -------
+async function downloadMultiple(){
+
+  selectBtn.disabled = true;
+  selectBtn.textContent = "Downloading...";
+
+  for(const fileId of selectedIds){
+
+    const fileData = loadedImages.find(img => img.id === fileId);
+    const fileName = fileData?.name || "photo.jpg";
+
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
+
+    try{
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      window.URL.revokeObjectURL(blobUrl);
+
+      // delay sikit supaya mobile stabil
+      await new Promise(r => setTimeout(r, 500));
+
+    }catch(err){
+      console.error("Failed:", fileId);
+    }
+  }
+
+  selectBtn.textContent = "Downloaded ✓";
+
+  setTimeout(()=>{
+    selectBtn.textContent = "Select";
+    selectBtn.disabled = false;
+    selectedIds.clear();
+
+    document.querySelectorAll(".selected").forEach(el=>{
+      el.classList.remove("selected");
+    });
+
+    selectMode = false;
+  },1500);
+}
+
+selectBtn.onclick = ()=>{
+
+  if(!selectMode){
+    selectMode = true;
+    selectedIds.clear();
+    selectBtn.textContent = "Download (0)";
+    return;
+  }
+
+  if(selectedIds.size === 0){
+    selectMode = false;
+    selectBtn.textContent = "Select";
+    return;
+  }
+
+  downloadMultiple();
+};
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
