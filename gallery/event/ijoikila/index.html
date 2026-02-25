@@ -169,16 +169,11 @@ const loadedImageSet = new Set();
 
 // ------------------- Download ---------------------
 function downloadCurrentImage(){
-
   const fileId = modalImageIds[currentIndex];
 
-  const link = document.createElement("a");
-  link.href = `https://drive.google.com/uc?export=download&id=${fileId}`;
-  link.download = "";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  const url = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
 
+  window.location.href = url;
 }
 
 downloadBtn.addEventListener("click", e=>{
