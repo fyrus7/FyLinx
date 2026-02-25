@@ -293,7 +293,7 @@ downloadBtn.addEventListener("click", e=>{
 // ------------------- MORE button -------------------
 const moreBtn = document.createElement("button");
 moreBtn.classList.add("btn-dark");
-moreBtn.textContent = "MORE";
+moreBtn.textContent = "More";
 moreBtn.style.display = "block";
 moreBtn.style.margin = "16px auto";
 moreBtn.style.padding = "8px 16px";
@@ -346,7 +346,8 @@ async function loadNextImages(){
   moreBtn.textContent = "MORE";
 
   if(!nextPageToken){
-    moreBtn.style.display = "none";
+   // moreBtn.style.display = "none";
+    moreBtn.style.visibility = "hidden";
   }
 }
 
@@ -605,7 +606,8 @@ selectBtn.onclick = ()=>{
   multiBar.style.display = "flex";
   multiCount.textContent = 0;
 
-  moreBtn.style.display = "none";
+//  moreBtn.style.display = "none";
+  moreBtn.style.visibility = "hidden";
 };
 
 function exitMultiMode(){
@@ -616,7 +618,8 @@ function exitMultiMode(){
   selectBtn.style.display = "inline-block";
 
   if(nextPageToken){
-    moreBtn.style.display = "block";
+   // moreBtn.style.display = "block";
+    moreBtn.style.visibility = "visible";
   }
 
   document.querySelectorAll(".selected")
