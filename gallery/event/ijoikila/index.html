@@ -613,10 +613,6 @@ function exitMultiMode(){
   multiBar.style.display = "none";
   selectBtn.style.display = "inline-block";
 
-  if(nextPageToken){
-    moreBtn.style.display = "block";
-  }
-
   document.querySelectorAll(".selected")
     .forEach(el=>el.classList.remove("selected"));
 }
