@@ -177,6 +177,10 @@ async function downloadCurrentImage(){
 
   try{
 
+    // UI state: downloading
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = "Downloading...";
+
     const response = await fetch(url);
     if(!response.ok) throw new Error("Network error");
 
@@ -192,8 +196,22 @@ async function downloadCurrentImage(){
 
     window.URL.revokeObjectURL(blobUrl);
 
+    // UI state: done
+    downloadBtn.textContent = "Downloaded ✓";
+
+    setTimeout(()=>{
+      downloadBtn.textContent = "Download";
+      downloadBtn.disabled = false;
+    },1500);
+
   }catch(err){
     console.error("Download failed:", err);
+
+    downloadBtn.textContent = "Failed";
+    setTimeout(()=>{
+      downloadBtn.textContent = "Download";
+      downloadBtn.disabled = false;
+    },1500);
   }
 }
 
