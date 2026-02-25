@@ -168,12 +168,29 @@ let currentIndex = 0;
 const loadedImageSet = new Set();
 
 // ------------------- Download ---------------------
-function downloadCurrentImage(){
-  const fileId = modalImageIds[currentIndex];
-  const url = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
+async function downloadCurrentImage(){
 
-  const win = window.open(url, "_blank");
-  if(win) win.focus();
+  const fileId = modalImageIds[currentIndex];
+  const url = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+  try{
+    const response = await fetch(url);
+    const blob = await response.blob();
+
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = "photo.jpg"; // boleh letak nama custom
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    window.URL.revokeObjectURL(blobUrl);
+
+  }catch(err){
+    console.error("Download failed:", err);
+  }
 }
 
 downloadBtn.addEventListener("click", e=>{
