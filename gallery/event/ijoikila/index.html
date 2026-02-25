@@ -120,6 +120,11 @@ button:disabled{
   opacity:0.6;
   cursor:default;
 }
+
+img.selected{
+  outline:3px solid #00aaff;
+  opacity:0.7;
+}
 </style>
 </head>
 
@@ -127,7 +132,11 @@ button:disabled{
 
 <header>
   <h1>FyLinx</h1>
-  <span style="font-size:12px; color:#fff; margin-left: auto;">Ijoy & Kila</span>
+
+  <div style="display:flex; gap:8px; align-items:center;">
+    <button id="selectBtn">SELECT</button>
+    <span style="font-size:12px; color:#fff;">Ijoy & Kila</span>
+  </div>
 </header>
 
 <div id="imageGrid"></div>
@@ -163,6 +172,9 @@ const modalImg = document.getElementById("modalImg");
 
 let modalImageIds = [];
 let currentIndex = 0;
+let selectMode = false;
+let selectedImages = new Set();
+const selectBtn = document.getElementById("selectBtn");
 const loadedImageSet = new Set();
   
 // ------------------- MORE button -------------------
@@ -281,7 +293,23 @@ function renderJustified(images){
       img.style.height = `${TARGET_ROW_HEIGHT * scale}px`;
       img.style.width = `${TARGET_ROW_HEIGHT * scale * item.ratio}px`;
 
-      img.onclick = ()=>openModal(item.id);
+      img.onclick = ()=>{
+
+  if(!selectMode){
+    openModal(item.id);
+    return;
+  }
+
+  if(selectedImages.has(item.id)){
+    selectedImages.delete(item.id);
+    img.classList.remove("selected");
+  }else{
+    selectedImages.add(item.id);
+    img.classList.add("selected");
+  }
+
+  selectBtn.textContent = `DOWNLOAD (${selectedImages.size})`;
+};
 
       rowDiv.appendChild(img);
     });
@@ -407,6 +435,47 @@ function handleSwipe(){
     showModalImage((currentIndex + 1) % modalImageIds.length);
   }
 }
+
+// download
+function downloadSelected(){
+
+  selectedImages.forEach(fileId => {
+
+    const link = document.createElement("a");
+    link.href = `https://drive.google.com/uc?export=download&id=${fileId}`;
+    link.download = "";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+  });
+
+}
+
+selectBtn.onclick = ()=>{
+
+  if(!selectMode){
+    selectMode = true;
+    selectedImages.clear();
+    selectBtn.textContent = "DOWNLOAD (0)";
+    return;
+  }
+
+  // jika dah ada selection → download
+  if(selectedImages.size > 0){
+    downloadSelected();
+  }
+
+  // reset mode
+  selectMode = false;
+  selectedImages.clear();
+  selectBtn.textContent = "SELECT";
+
+  document.querySelectorAll("img.selected").forEach(img=>{
+    img.classList.remove("selected");
+  });
+
+};
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
