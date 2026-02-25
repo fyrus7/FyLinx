@@ -125,6 +125,27 @@ img.selected{
   outline:3px solid #00aaff;
   opacity:.6;
 }
+
+#multiBar{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#000;
+  padding:10px 18px;
+  border-radius:30px;
+  display:flex;
+  align-items:center;
+  gap:20px;
+  box-shadow:0 5px 20px rgba(0,0,0,.5);
+  z-index:200;
+  display:none;
+}
+
+#multiBar button{
+  background:#00aaff;
+  color:#fff;
+}
 </style>
 </head>
 
@@ -144,6 +165,14 @@ img.selected{
 <footer>
   &copy; <span id="year"></span> FyLinx.
 </footer>
+
+<div id="multiBar">
+  <span id="multiCount">0 selected</span>
+  <div style="display:flex; gap:10px;">
+    <button id="multiDownload">Download</button>
+    <button id="multiCancel">X</button>
+  </div>
+</div>
 
 <div class="modal" id="modal">
   <img id="modalImg">
@@ -174,6 +203,10 @@ const selectBtn = document.getElementById("selectBtn");
 let selectMode = false;
 let selectedIds = new Set();
 const downloadBtn = document.getElementById("downloadBtn");
+const multiBar = document.getElementById("multiBar");
+const multiDownload = document.getElementById("multiDownload");
+const multiCancel = document.getElementById("multiCancel");
+const multiCount = document.getElementById("multiCount");
 
 let modalImageIds = [];
 let currentIndex = 0;
@@ -363,7 +396,7 @@ function renderJustified(images){
           img.classList.add("selected");
         }
         
-        selectBtn.textContent = `Download (${selectedIds.size})`;
+        multiCount.textContent = `${selectedIds.size} selected`;
       };
 
       rowDiv.appendChild(img);
@@ -494,8 +527,8 @@ function handleSwipe(){
 // ------- multi download -------
 async function downloadMultiple(){
 
-  selectBtn.disabled = true;
-  selectBtn.textContent = "Downloading...";
+  multiDownload.disabled = true;
+  multiDownload.textContent = "Downloading...";
 
   for(const fileId of selectedIds){
 
@@ -518,46 +551,46 @@ async function downloadMultiple(){
 
       window.URL.revokeObjectURL(blobUrl);
 
-      // delay sikit supaya mobile stabil
-      await new Promise(r => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 400));
 
     }catch(err){
       console.error("Failed:", fileId);
     }
   }
 
-  selectBtn.textContent = "Downloaded ✓";
+  multiDownload.textContent = "Done ✓";
 
   setTimeout(()=>{
-    selectBtn.textContent = "Select";
-    selectBtn.disabled = false;
-    selectedIds.clear();
-
-    document.querySelectorAll(".selected").forEach(el=>{
-      el.classList.remove("selected");
-    });
-
-    selectMode = false;
+    multiDownload.textContent = "Download";
+    multiDownload.disabled = false;
+    exitMultiMode();
   },1500);
 }
 
+multiDownload.onclick = downloadMultiple;
+
 selectBtn.onclick = ()=>{
 
-  if(!selectMode){
-    selectMode = true;
-    selectedIds.clear();
-    selectBtn.textContent = "Download (0)";
-    return;
-  }
+  selectMode = true;
+  selectedIds.clear();
 
-  if(selectedIds.size === 0){
-    selectMode = false;
-    selectBtn.textContent = "Select";
-    return;
-  }
-
-  downloadMultiple();
+  selectBtn.style.display = "none";
+  multiBar.style.display = "flex";
+  multiCount.textContent = "0 selected";
 };
+
+function exitMultiMode(){
+  selectMode = false;
+  selectedIds.clear();
+
+  multiBar.style.display = "none";
+  selectBtn.style.display = "inline-block";
+
+  document.querySelectorAll(".selected")
+    .forEach(el=>el.classList.remove("selected"));
+}
+
+multiCancel.onclick = exitMultiMode;
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
