@@ -170,10 +170,10 @@ const loadedImageSet = new Set();
 // ------------------- Download ---------------------
 function downloadCurrentImage(){
   const fileId = modalImageIds[currentIndex];
-
   const url = `https://drive.google.com/uc?export=download&id=${fileId}&confirm=t`;
 
-  window.location.href = url;
+  const win = window.open(url, "_blank");
+  if(win) win.focus();
 }
 
 downloadBtn.addEventListener("click", e=>{
