@@ -157,13 +157,6 @@ img.selected{
   z-index:200;
   display:none;
 }
-
-#multiBar button{
-  background:transparent;
-  color:#fff;
-  border:1px solid rgba(255,255,255,.3);
-  transition:background .2s ease;
-}
 #selectBtn{
   background:none;
   border:none;
@@ -343,7 +336,7 @@ async function loadNextImages(){
   // reset button
   isLoading = false;
   moreBtn.disabled = false;
-  moreBtn.textContent = "MORE";
+  moreBtn.textContent = "More";
 
   if(!nextPageToken){
    // moreBtn.style.display = "none";
