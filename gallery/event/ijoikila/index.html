@@ -171,27 +171,6 @@ img.selected{
   outline:3px solid #00aaff;
   opacity:.6;
 }
-
-#multiBar{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#000;
-  padding:10px 16px;
-  border-radius:30px;
-  display:flex;
-  align-items:center;
-  gap:20px;
-  box-shadow:0 5px 20px rgba(0,0,0,.5);
-  z-index:200;
-  display:none;
-}
-
-#multiBar button{
-  background:#00aaff;
-  color:#fff;
-}
 </style>
 </head>
 
@@ -199,20 +178,14 @@ img.selected{
 
 <header>
   <h1>FyLinx</h1>
+
   <div style="display:flex; gap:8px; align-items:center;">
+    <button id="selectBtn">Select</button>
     <span style="font-size:12px; color:#fff;">Ijoy & Kila</span>
   </div>
 </header>
 
 <div id="imageGrid"></div>
-
-<div id="multiBar">
-  <span id="multiCount">0 selected</span>
-  <div style="display:flex; gap:10px;">
-    <button id="multiDownload">Download</button>
-    <button id="multiCancel">X</button>
-  </div>
-</div>
 
 <footer>
   &copy; <span id="year"></span> FyLinx.
@@ -243,14 +216,10 @@ let isLoading = false;
 const gallery = document.getElementById("imageGrid");
 const modal = document.getElementById("modal");
 const modalImg = document.getElementById("modalImg");
+const selectBtn = document.getElementById("selectBtn");
 let selectMode = false;
 let selectedIds = new Set();
 const downloadBtn = document.getElementById("downloadBtn");
-
-const multiBar = document.getElementById("multiBar");
-const multiDownload = document.getElementById("multiDownload");
-const multiCancel = document.getElementById("multiCancel");
-const multiCount = document.getElementById("multiCount");
 
 let modalImageIds = [];
 let currentIndex = 0;
@@ -429,27 +398,23 @@ function renderJustified(images){
     img.style.height = `${TARGET_ROW_HEIGHT * scale}px`;
     img.style.width = `${TARGET_ROW_HEIGHT * scale * item.ratio}px`;
 
-    let holdTimer;
-    
-    img.addEventListener("touchstart", ()=>{
-      holdTimer = setTimeout(()=>{
-        activateMultiMode();
-        toggleSelect(wrapper, item.id);
-      },600);
-    });
-    
-    img.addEventListener("touchend", ()=>{
-      clearTimeout(holdTimer);
-    });
+    img.onclick = ()=>{
 
-img.onclick = ()=>{
-  if(!selectMode){
-    openModal(item.id);
-    return;
-  }
+      if(!selectMode){
+        openModal(item.id);
+        return;
+      }
 
-  toggleSelect(wrapper, item.id);
-};
+      if(selectedIds.has(item.id)){
+        selectedIds.delete(item.id);
+        wrapper.classList.remove("selected");
+      }else{
+        selectedIds.add(item.id);
+        wrapper.classList.add("selected");
+      }
+
+      selectBtn.textContent = `Download (${selectedIds.size})`;
+    };
 
     wrapper.appendChild(img);
     rowDiv.appendChild(wrapper);
@@ -578,6 +543,103 @@ function handleSwipe(){
   }
 }
 
+// ------- multi download -------
+async function downloadMultiple(){
+
+  selectBtn.disabled = true;
+
+  const total = selectedIds.size;
+  let current = 0;
+
+  for(const fileId of selectedIds){
+
+    current++;
+    selectBtn.textContent = `Downloading (${current} / ${total})`;
+
+    const fileData = loadedImages.find(img => img.id === fileId);
+    const fileName = fileData?.name || "photo.jpg";
+
+    const wrapper = [...document.querySelectorAll(".thumb-wrapper")]
+      .find(w => w.querySelector("img")?.src.includes(fileId));
+
+    const ring = createProgressRing();
+    wrapper.appendChild(ring.container);
+
+    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
+
+    try{
+
+      const response = await fetch(url);
+      const reader = response.body.getReader();
+      const contentLength = +response.headers.get("Content-Length");
+
+      let received = 0;
+
+      while(true){
+        const {done, value} = await reader.read();
+        if(done) break;
+        received += value.length;
+
+        const percent = received / contentLength;
+        const offset = 126 - (126 * percent);
+        ring.circle.style.strokeDashoffset = offset;
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(blobUrl);
+
+      wrapper.classList.add("done");
+      wrapper.removeChild(ring.container);
+
+      await new Promise(r => setTimeout(r, 300));
+
+    }catch(err){
+      console.error("Fail:", fileId);
+    }
+  }
+
+  selectBtn.textContent = "Downloaded ✓";
+
+  setTimeout(()=>{
+    selectBtn.textContent = "Select";
+    selectBtn.disabled = false;
+    selectedIds.clear();
+    selectMode = false;
+
+    document.querySelectorAll(".thumb-wrapper")
+      .forEach(w=>{
+        w.classList.remove("selected","done");
+      });
+
+  },1500);
+}
+
+selectBtn.onclick = ()=>{
+
+  if(!selectMode){
+    selectMode = true;
+    selectedIds.clear();
+    selectBtn.textContent = "Download (0)";
+    return;
+  }
+
+  if(selectedIds.size === 0){
+    selectMode = false;
+    selectBtn.textContent = "Select";
+    return;
+  }
+
+  downloadMultiple();
+};
 
 function createProgressRing(){
 
@@ -594,84 +656,6 @@ function createProgressRing(){
 
   return { container, circle };
 }
-
-function activateMultiMode(){
-  if(selectMode) return;
-  selectMode = true;
-  multiBar.style.display = "flex";
-}
-
-function toggleSelect(wrapper, id){
-
-  if(selectedIds.has(id)){
-    selectedIds.delete(id);
-    wrapper.classList.remove("selected");
-  }else{
-    selectedIds.add(id);
-    wrapper.classList.add("selected");
-  }
-
-  multiCount.textContent = `${selectedIds.size} selected`;
-
-  if(selectedIds.size === 0){
-    exitMultiMode();
-  }
-}
-
-function exitMultiMode(){
-  selectMode = false;
-  selectedIds.clear();
-  multiBar.style.display = "none";
-
-  document.querySelectorAll(".thumb-wrapper")
-    .forEach(w=>w.classList.remove("selected","done"));
-}
-
-multiCancel.onclick = exitMultiMode;
-
-multiDownload.onclick = async ()=>{
-
-  if(selectedIds.size === 0) return;
-
-  multiDownload.disabled = true;
-  multiDownload.textContent = "Downloading...";
-
-  const total = selectedIds.size;
-  let current = 0;
-
-  for(const fileId of selectedIds){
-
-    current++;
-    multiCount.textContent = `${current} / ${total}`;
-
-    const fileData = loadedImages.find(img => img.id === fileId);
-    const fileName = fileData?.name || "photo.jpg";
-
-    const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`;
-
-    const response = await fetch(url);
-    const blob = await response.blob();
-
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(blobUrl);
-
-    await new Promise(r=>setTimeout(r,400));
-  }
-
-  multiDownload.textContent = "Done ✓";
-
-  setTimeout(()=>{
-    multiDownload.textContent = "Download";
-    multiDownload.disabled = false;
-    exitMultiMode();
-  },1500);
-};
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
 loadNextImages();
