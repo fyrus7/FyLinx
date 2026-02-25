@@ -587,6 +587,8 @@ selectBtn.onclick = ()=>{
   selectBtn.style.display = "none";
   multiBar.style.display = "flex";
   multiCount.textContent = 0;
+
+  moreBtn.style.display = "none";
 };
 
 function exitMultiMode(){
@@ -595,6 +597,10 @@ function exitMultiMode(){
 
   multiBar.style.display = "none";
   selectBtn.style.display = "inline-block";
+
+  if(nextPageToken){
+    moreBtn.style.display = "block";
+  }
 
   document.querySelectorAll(".selected")
     .forEach(el=>el.classList.remove("selected"));
