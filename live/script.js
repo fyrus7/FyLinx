@@ -10,7 +10,7 @@ const PAGE_SIZE = 10;
 
 async function initGallery(){
 
-  const response = await fetch("/live/client.json");
+  const response = await fetch("live/client.json");
   const galleries = await response.json();
 
   const pathParts = window.location.pathname.split("/");
