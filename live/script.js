@@ -1,37 +1,4 @@
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
-let FOLDER_ID;
-const PAGE_SIZE = 10;
-
-async function initGallery(){
-
-  const response = await fetch("/live/client.json");
-  const galleries = await response.json();
-
-  const pathParts = window.location.pathname
-    .split("/")
-    .filter(Boolean);
-  
-  const slug = pathParts[pathParts.length - 1];
-
-  const galleryConfig = galleries[slug];
-
-  if(!galleryConfig){
-    document.body.innerHTML = "Gallery not found";
-    return;
-  }
-
-  // set folder ID
-  FOLDER_ID = galleryConfig.folder;
-
-  // set header name
-  const nameEl = document.getElementById("clientName");
-  if(nameEl){
-    nameEl.textContent = galleryConfig.name;
-  }
-
-  // start loading
-  loadNextImages();
-}
 
 let nextPageToken = null;
 let isLoading = false;
@@ -443,6 +410,4 @@ multiCancel.onclick = exitMultiMode;
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
-initGallery();
-
-
+loadNextImages();
