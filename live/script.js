@@ -1,9 +1,4 @@
 <script>
-    // Get the current year from the device and update the copyright span
-    document.getElementById("year").textContent = new Date().getFullYear();
-</script>
-
-<script>
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 let FOLDER_ID;
 const PAGE_SIZE = 10;
