@@ -48,14 +48,18 @@ button{
   display:flex;
   flex-direction:column;
   gap:6px;
-  max-width:95%;
+  max-width:1200px;   /* atau 1100px ikut taste */
+  width:100%;
   margin:0 auto;
+  padding:0 12px;     /* bagi breathing space kiri kanan */
+  box-sizing:border-box;
 }
 
 .row{
   display:flex;
   gap:6px;
   width:100%;
+  justify-content:center;
 }
 
 .row img{
