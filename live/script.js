@@ -1,4 +1,3 @@
-<script>
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 let FOLDER_ID;
 const PAGE_SIZE = 10;
@@ -445,6 +444,5 @@ multiCancel.onclick = exitMultiMode;
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
 initGallery();
-</script>
 
 
