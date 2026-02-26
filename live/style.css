@@ -1,5 +1,10 @@
+html, body{
+  overflow-x: hidden;
+}
+
 body{
   margin:0;
+  padding:0 10px;   /* ini buat page ada ruang kiri kanan */
   font-family:system-ui, sans-serif;
   background:#111;
   color:#fff;
@@ -48,10 +53,9 @@ button{
   display:flex;
   flex-direction:column;
   gap:6px;
-  max-width:1200px;   /* atau 1100px ikut taste */
   width:100%;
+  max-width:1200px;
   margin:0 auto;
-  padding:0 12px;     /* bagi breathing space kiri kanan */
   box-sizing:border-box;
 }
 
@@ -59,7 +63,7 @@ button{
   display:flex;
   gap:6px;
   width:100%;
-  justify-content:center;
+  overflow:hidden; /* elak image tolak keluar */
 }
 
 .row img{
