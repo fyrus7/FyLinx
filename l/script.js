@@ -1,27 +1,7 @@
 function getSlug(){
-
-  // Mode 1: /l/slug
-  const path = window.location.pathname;
-  const parts = path.split("/").filter(Boolean);
-
-  if(parts.length >= 2 && parts[0] === "l"){
-    return parts[1].toLowerCase();
-  }
-
-  // Mode 2: ?g=slug
   const params = new URLSearchParams(window.location.search);
   return params.get("g")?.toLowerCase() || null;
 }
-
-  // expected: /l/siti
-  if (parts.length >= 2 && parts[0] === "l") {
-    return parts[1].toLowerCase();
-  }
-
-  return null;
-}
-
-const slug = getSlug();
 
 const FOLDER_MAP = {
   ijoikila: "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE",
