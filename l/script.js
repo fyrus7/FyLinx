@@ -1,6 +1,7 @@
-function getSlug() {
-  const path = window.location.pathname;
-  const parts = path.split("/").filter(Boolean);
+function getSlug(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("g");
+}
 
   // expected: /l/siti
   if (parts.length >= 2 && parts[0] === "l") {
