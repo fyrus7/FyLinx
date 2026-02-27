@@ -3,6 +3,15 @@ function getSlug(){
   return params.get("g")?.toLowerCase() || null;
 }
 
+const slug = getSlug();
+
+const FOLDER_MAP = {
+  ijoikila: "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE",
+  zureenyantt: "1xGqkPTjU9Z9eIXJWHrnFc8ebd3jadsKA"
+};
+
+const FOLDER_ID = FOLDER_MAP[slug];
+
 const FOLDER_MAP = {
   ijoikila: "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE",
   zureenyantt: "1xGqkPTjU9Z9eIXJWHrnFc8ebd3jadsKA"
