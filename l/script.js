@@ -1,6 +1,16 @@
 function getSlug(){
+
+  // Mode 1: /l/slug
+  const path = window.location.pathname;
+  const parts = path.split("/").filter(Boolean);
+
+  if(parts.length >= 2 && parts[0] === "l"){
+    return parts[1].toLowerCase();
+  }
+
+  // Mode 2: ?g=slug
   const params = new URLSearchParams(window.location.search);
-  return params.get("g");
+  return params.get("g")?.toLowerCase() || null;
 }
 
   // expected: /l/siti
