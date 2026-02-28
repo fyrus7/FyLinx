@@ -52,10 +52,16 @@ button{
   opacity:.5;
 }
 
+.full-width{
+  width:100%;
+  margin-bottom:6px;
+}
+
 #imageGrid{
   display:flex;
   gap:6px;
   width:100%;
+  flex-wrap:wrap; /* penting */
 }
 
 .masonry-column{
