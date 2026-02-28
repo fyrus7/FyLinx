@@ -1,1 +1,12 @@
-dynamic live gallery
+# Dynamic live gallery
+
+only edit json file as follows
+
+"urlpath1": {
+    "folder": "[ drive id ]",
+    "title": "Name & Name"
+  },
+  "urlpath2": {
+    "folder": "[ drive id ]",
+    "title": "Name & Nsame"
+  }
