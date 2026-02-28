@@ -10,3 +10,7 @@ only edit json file as follows
     "folder": "[ drive id ]",
     "title": "Name & Nsame"
   }
+
+# full url
+
+ fylinx.pages.dev/galleries/?live=urlpath
