@@ -52,29 +52,26 @@ button{
   opacity:.5;
 }
 
-.full-width{
-  width:100%;
-  margin-bottom:6px;
-}
-
 #imageGrid{
-  display:flex;
-  gap:6px;
-  width:100%;
-  flex-wrap:wrap; /* penting */
-}
-
-.masonry-column{
-  flex:1;              /* WAJIB */
   display:flex;
   flex-direction:column;
   gap:6px;
+  width:100%;
+  max-width:1400px;
+  margin:0 auto;
+  box-sizing:border-box;
 }
 
-#imageGrid img{
+.row{
+  display:flex;
+  gap:6px;
   width:100%;
-  display:block;       /* tambah ini */
-  border-radius:4px;
+  overflow:hidden; /* elak image tolak keluar */
+}
+
+.row img{
+  object-fit:cover;
+  cursor:pointer;
 }
 
 footer{
