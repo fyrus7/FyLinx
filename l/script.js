@@ -7,14 +7,7 @@ const slug = getSlug();
 
 const FOLDER_MAP = {
   ijoikila: "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE",
-  zureenyantt: "1xGqkPTjU9Z9eIXJWHrnFc8ebd3jadsKA"
-};
-
-const FOLDER_ID = FOLDER_MAP[slug];
-
-const FOLDER_MAP = {
-  ijoikila: "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE",
-  zureenyantt: "1xGqkPTjU9Z9eIXJWHrnFc8ebd3jadsKA"
+  zureenyanty: "1xGqkPTjU9Z9eIXJWHrnFc8ebd3jadsKA"
 };
 
 const FOLDER_ID = FOLDER_MAP[slug];
