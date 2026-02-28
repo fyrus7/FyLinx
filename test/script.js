@@ -218,72 +218,8 @@ function addImages(files){
 
   newImages.forEach(img => modalImageIds.push(img.id));
   loadedImages = loadedImages.concat(newImages);
-  renderJustified(newImages);
+  renderGrid(newImages);
 });
-}
-
-
-function renderJustified(images){
-
-  const container = document.getElementById("imageGrid");
-  const TARGET_ROW_HEIGHT = 220;
-  const MAX_WIDTH = 1350;   // ini had sebenar
-  const containerWidth = Math.min(container.clientWidth, MAX_WIDTH);
-
-  let row = [];
-  let rowWidth = 0;
-
-  function addRow(row, rowWidth){
-    const rowDiv = document.createElement("div");
-    rowDiv.className = "row";
-
-    const scale = containerWidth / rowWidth;
-
-    row.forEach(item=>{
-      const img = document.createElement("img");
-      img.src = item.thumb;
-      img.style.height = `${TARGET_ROW_HEIGHT * scale}px`;
-      img.style.width = `${TARGET_ROW_HEIGHT * scale * item.ratio}px`;
-
-      img.onclick = ()=>{
-
-        if(!selectMode){
-          openModal(item.id);
-          return;
-        }
-        
-        if(selectedIds.has(item.id)){
-          selectedIds.delete(item.id);
-          img.classList.remove("selected");
-        }else{
-          selectedIds.add(item.id);
-          img.classList.add("selected");
-        }
-        
-        multiCount.textContent = selectedIds.size;
-      };
-
-      rowDiv.appendChild(img);
-    });
-
-    container.appendChild(rowDiv);
-  }
-
-  images.forEach(img=>{
-    const scaledWidth = img.ratio * TARGET_ROW_HEIGHT;
-    row.push(img);
-    rowWidth += scaledWidth;
-
-    if(rowWidth >= containerWidth){
-      addRow(row, rowWidth);
-      row = [];
-      rowWidth = 0;
-    }
-  });
-
-  if(row.length){
-    addRow(row, rowWidth);
-  }
 }
 
 // ------------------- Modal -------------------
