@@ -1,4 +1,17 @@
+/*function getSlug(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get("g")?.toLowerCase() || null;
+} */
 function getSlug(){
+
+  // 1️⃣ Path mode → /l/ijoikila
+  const parts = window.location.pathname.split("/").filter(Boolean);
+
+  if(parts[0] === "l" && parts[1]){
+    return parts[1].toLowerCase();
+  }
+
+  // 2️⃣ Fallback → ?g=ijoikila
   const params = new URLSearchParams(window.location.search);
   return params.get("g")?.toLowerCase() || null;
 }
