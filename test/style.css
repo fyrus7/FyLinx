@@ -53,39 +53,23 @@ button{
 }
 
 #imageGrid{
-  display:grid;
+  display:flex;
   gap:6px;
-  grid-auto-rows:8px; /* penting */
   width:100%;
   margin:0 auto;
 }
 
-/* Desktop */
-@media (min-width:1200px){
-  #imageGrid{
-    grid-template-columns:repeat(5,1fr);
-    max-width:1500px;
-  }
-}
-
-/* Tablet */
-@media (min-width:700px) and (max-width:1199px){
-  #imageGrid{
-    grid-template-columns:repeat(4,1fr);
-  }
-}
-
-/* Mobile */
-@media (max-width:699px){
-  #imageGrid{
-    grid-template-columns:repeat(2,1fr);
-  }
+.masonry-column{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
 }
 
 #imageGrid img{
   width:100%;
-  object-fit:cover;
   border-radius:4px;
+  object-fit:cover;
 }
 
 footer{
