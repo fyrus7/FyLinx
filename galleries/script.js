@@ -19,23 +19,20 @@ async function loadFolderConfig(){
     const res = await fetch("folders.json");
     const FOLDER_MAP = await res.json();
 
-    FOLDER_ID = FOLDER_MAP[slug];
+    const config = FOLDER_MAP[slug];
 
-    if(!FOLDER_ID){
+    if(!config){
       document.body.innerHTML = "<h2>Gallery not found</h2>";
       return;
     }
 
-    // ✅ Ambil folder ID dari object
     FOLDER_ID = config.folder;
-    
-    // ✅ Tukar teks header kecil
+
     const titleEl = document.getElementById("galleryTitle");
     if(titleEl && config.title){
       titleEl.textContent = config.title;
     }
 
-    // hanya mula load gambar selepas dapat FOLDER_ID
     loadNextImages();
 
   }catch(err){
