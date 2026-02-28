@@ -218,74 +218,72 @@ function addImages(files){
 
   newImages.forEach(img => modalImageIds.push(img.id));
   loadedImages = loadedImages.concat(newImages);
-  renderMasonry(newImages);
+  renderJustified(newImages);
 });
 }
 
-// render Masonry
-function renderMasonry(images){
 
-  let columns = document.querySelectorAll(".masonry-column");
+function renderJustified(images){
 
-  if(columns.length === 0){
-    const columnCount = getColumnCount();
+  const container = document.getElementById("imageGrid");
+  const TARGET_ROW_HEIGHT = 220;
+  const containerWidth = container.clientWidth;
 
-    for(let i=0;i<columnCount;i++){
-      const col = document.createElement("div");
-      col.className = "masonry-column";
-      gallery.appendChild(col);
-    }
+  let row = [];
+  let rowWidth = 0;
 
-    columns = document.querySelectorAll(".masonry-column");
+  function addRow(row, rowWidth){
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "row";
+
+    const scale = containerWidth / rowWidth;
+
+    row.forEach(item=>{
+      const img = document.createElement("img");
+      img.src = item.thumb;
+      img.style.height = `${TARGET_ROW_HEIGHT * scale}px`;
+      img.style.width = `${TARGET_ROW_HEIGHT * scale * item.ratio}px`;
+
+      img.onclick = ()=>{
+
+        if(!selectMode){
+          openModal(item.id);
+          return;
+        }
+        
+        if(selectedIds.has(item.id)){
+          selectedIds.delete(item.id);
+          img.classList.remove("selected");
+        }else{
+          selectedIds.add(item.id);
+          img.classList.add("selected");
+        }
+        
+        multiCount.textContent = selectedIds.size;
+      };
+
+      rowDiv.appendChild(img);
+    });
+
+    container.appendChild(rowDiv);
   }
 
-  images.forEach((item, index)=>{
-    const img = document.createElement("img");
-    img.src = item.thumb;
+  images.forEach(img=>{
+    const scaledWidth = img.ratio * TARGET_ROW_HEIGHT;
+    row.push(img);
+    rowWidth += scaledWidth;
 
-    // LANDSCAPE detection
-    if(item.ratio > 1.2){
-      img.classList.add("full-width");
-      gallery.appendChild(img);
-      return;
+    if(rowWidth >= containerWidth){
+      addRow(row, rowWidth);
+      row = [];
+      rowWidth = 0;
     }
-
-    // PORTRAIT → normal 2 column
-    const columnIndex = index % columns.length;
-    columns[columnIndex].appendChild(img);
-
-    img.onclick = ()=>{
-      if(!selectMode){
-        openModal(item.id);
-        return;
-      }
-
-      if(selectedIds.has(item.id)){
-        selectedIds.delete(item.id);
-        img.classList.remove("selected");
-      }else{
-        selectedIds.add(item.id);
-        img.classList.add("selected");
-      }
-
-      multiCount.textContent = selectedIds.size;
-    };
   });
+
+  if(row.length){
+    addRow(row, rowWidth);
+  }
 }
-
-window.addEventListener("resize", ()=>{
-  gallery.innerHTML = "";
-  renderMasonry(loadedImages);
-});
-
-function getColumnCount(){
-  const width = window.innerWidth;
-
-  if(width >= 1200) return 5;
-  if(width >= 700) return 4;
-  return 2;
-}
-
 
 // ------------------- Modal -------------------
 function openModal(fileId){
