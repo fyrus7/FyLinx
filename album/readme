@@ -1,0 +1,17 @@
+# Dynamic live gallery
+
+only edit json file as follows
+
+"path1": {
+    "folder": "[ drive id ]",
+    "title": "Name & Name"
+  },
+  "path2": {
+    "folder": "[ drive id ]",
+    "title": "Name & Nsame"
+  }
+
+
+# full url
+
+ fylinx.pages.dev/album/?live=urlpath
