@@ -229,6 +229,14 @@ function renderMasonry(images){
     const img = document.createElement("img");
     img.src = item.thumb;
 
+    img.onload = ()=>{
+      const rowHeight = 8;
+      const rowSpan = Math.ceil(
+        img.getBoundingClientRect().height / rowHeight
+      );
+      img.style.gridRowEnd = `span ${rowSpan}`;
+    };
+
     img.onclick = ()=>{
       if(!selectMode){
         openModal(item.id);
