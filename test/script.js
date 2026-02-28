@@ -227,7 +227,8 @@ function renderJustified(images){
 
   const container = document.getElementById("imageGrid");
   const TARGET_ROW_HEIGHT = 220;
-  const containerWidth = container.clientWidth;
+  const MAX_WIDTH = 1350;   // ini had sebenar
+  const containerWidth = Math.min(container.clientWidth, MAX_WIDTH);
 
   let row = [];
   let rowWidth = 0;
