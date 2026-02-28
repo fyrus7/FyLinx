@@ -222,6 +222,39 @@ function addImages(files){
 });
 }
 
+function renderGrid(images){
+
+  images.forEach(item=>{
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "thumb";
+
+    const img = document.createElement("img");
+    img.src = item.thumb;
+
+    wrapper.appendChild(img);
+
+    wrapper.onclick = ()=>{
+      if(!selectMode){
+        openModal(item.id);
+        return;
+      }
+
+      if(selectedIds.has(item.id)){
+        selectedIds.delete(item.id);
+        wrapper.classList.remove("selected");
+      }else{
+        selectedIds.add(item.id);
+        wrapper.classList.add("selected");
+      }
+
+      multiCount.textContent = selectedIds.size;
+    };
+
+    gallery.appendChild(wrapper);
+  });
+}
+
 // ------------------- Modal -------------------
 function openModal(fileId){
   currentIndex = modalImageIds.indexOf(fileId);
