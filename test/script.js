@@ -243,7 +243,14 @@ function renderMasonry(images){
     const img = document.createElement("img");
     img.src = item.thumb;
 
-    // guna round-robin dulu supaya balance awal
+    // LANDSCAPE detection
+    if(item.ratio > 1.2){
+      img.classList.add("full-width");
+      gallery.appendChild(img);
+      return;
+    }
+
+    // PORTRAIT → normal 2 column
     const columnIndex = index % columns.length;
     columns[columnIndex].appendChild(img);
 
