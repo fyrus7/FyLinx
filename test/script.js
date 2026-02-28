@@ -227,9 +227,7 @@ function renderMasonry(images){
 
   let columns = document.querySelectorAll(".masonry-column");
 
-  // kalau belum ada column, bina sekali sahaja
   if(columns.length === 0){
-
     const columnCount = getColumnCount();
 
     for(let i=0;i<columnCount;i++){
@@ -241,17 +239,13 @@ function renderMasonry(images){
     columns = document.querySelectorAll(".masonry-column");
   }
 
-  images.forEach(item=>{
+  images.forEach((item, index)=>{
     const img = document.createElement("img");
     img.src = item.thumb;
 
-    img.onload = ()=>{
-      const shortestColumn = Array.from(columns).reduce((prev, curr)=>
-        prev.offsetHeight <= curr.offsetHeight ? prev : curr
-      );
-
-      shortestColumn.appendChild(img);
-    };
+    // guna round-robin dulu supaya balance awal
+    const columnIndex = index % columns.length;
+    columns[columnIndex].appendChild(img);
 
     img.onclick = ()=>{
       if(!selectMode){
@@ -276,7 +270,6 @@ window.addEventListener("resize", ()=>{
   gallery.innerHTML = "";
   renderMasonry(loadedImages);
 });
-
 
 function getColumnCount(){
   const width = window.innerWidth;
