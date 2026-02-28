@@ -154,8 +154,12 @@ button:disabled{
   cursor:default;
 }
 
-img.selected{
+.thumb.selected{
   outline:3px solid #00aaff;
+  border-radius:6px;
+}
+
+.thumb.selected img{
   opacity:.6;
 }
 
