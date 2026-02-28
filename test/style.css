@@ -53,7 +53,9 @@ button{
 }
 
 #imageGrid{
-  column-gap:6px;
+  display:grid;
+  gap:6px;
+  grid-auto-rows:8px; /* penting */
   width:100%;
   margin:0 auto;
 }
@@ -61,7 +63,7 @@ button{
 /* Desktop */
 @media (min-width:1200px){
   #imageGrid{
-    column-count:5;
+    grid-template-columns:repeat(5,1fr);
     max-width:1500px;
   }
 }
@@ -69,23 +71,20 @@ button{
 /* Tablet */
 @media (min-width:700px) and (max-width:1199px){
   #imageGrid{
-    column-count:4;
+    grid-template-columns:repeat(4,1fr);
   }
 }
 
 /* Mobile */
 @media (max-width:699px){
   #imageGrid{
-    column-count:2;
+    grid-template-columns:repeat(2,1fr);
   }
 }
 
 #imageGrid img{
   width:100%;
-  margin-bottom:6px;
-  break-inside:avoid;
   object-fit:cover;
-  cursor:pointer;
   border-radius:4px;
 }
 
