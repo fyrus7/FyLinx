@@ -26,6 +26,15 @@ async function loadFolderConfig(){
       return;
     }
 
+    // ✅ Ambil folder ID dari object
+    FOLDER_ID = config.folder;
+    
+    // ✅ Tukar teks header kecil
+    const titleEl = document.getElementById("galleryTitle");
+    if(titleEl && config.title){
+      titleEl.textContent = config.title;
+    }
+
     // hanya mula load gambar selepas dapat FOLDER_ID
     loadNextImages();
 
