@@ -218,23 +218,35 @@ function addImages(files){
 
   newImages.forEach(img => modalImageIds.push(img.id));
   loadedImages = loadedImages.concat(newImages);
-  renderMasonry(newImages);
+  renderMasonry(loadedImages);
 });
 }
 
 // render Masonry
 function renderMasonry(images){
 
+  const columnCount = getColumnCount();
+  gallery.innerHTML = "";
+
+  const columns = [];
+
+  for(let i=0;i<columnCount;i++){
+    const col = document.createElement("div");
+    col.className = "masonry-column";
+    gallery.appendChild(col);
+    columns.push(col);
+  }
+
   images.forEach(item=>{
     const img = document.createElement("img");
     img.src = item.thumb;
 
     img.onload = ()=>{
-      const rowHeight = 8;
-      const rowSpan = Math.ceil(
-        img.getBoundingClientRect().height / rowHeight
+      const shortestColumn = columns.reduce((prev, curr)=>
+        prev.scrollHeight <= curr.scrollHeight ? prev : curr
       );
-      img.style.gridRowEnd = `span ${rowSpan}`;
+
+      shortestColumn.appendChild(img);
     };
 
     img.onclick = ()=>{
@@ -253,9 +265,15 @@ function renderMasonry(images){
 
       multiCount.textContent = selectedIds.size;
     };
-
-    gallery.appendChild(img);
   });
+}
+
+function getColumnCount(){
+  const width = window.innerWidth;
+
+  if(width >= 1200) return 5;
+  if(width >= 700) return 4;
+  return 2;
 }
 
 
