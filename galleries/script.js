@@ -5,6 +5,36 @@ function getSlug(){
 
 const slug = getSlug();
 
+// new json detection
+let FOLDER_ID = null;
+
+async function loadFolderConfig(){
+
+  if(!slug){
+    document.body.innerHTML = "<h2>Gallery not found</h2>";
+    return;
+  }
+
+  try{
+    const res = await fetch("folders.json");
+    const FOLDER_MAP = await res.json();
+
+    FOLDER_ID = FOLDER_MAP[slug];
+
+    if(!FOLDER_ID){
+      document.body.innerHTML = "<h2>Gallery not found</h2>";
+      return;
+    }
+
+    // hanya mula load gambar selepas dapat FOLDER_ID
+    loadNextImages();
+
+  }catch(err){
+    console.error("Failed to load folders.json", err);
+    document.body.innerHTML = "<h2>Config error</h2>";
+  }
+}
+/*
 const FOLDER_MAP = {
   ijoikila: "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE",
   zureenyanty: "1xGqkPTjU9Z9eIXJWHrnFc8ebd3jadsKA"
@@ -15,7 +45,7 @@ const FOLDER_ID = FOLDER_MAP[slug];
 if (!FOLDER_ID) {
   document.body.innerHTML = "<h2>Gallery not found</h2>";
   throw new Error("Invalid slug");
-}
+} */
 
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 
@@ -429,4 +459,5 @@ multiCancel.onclick = exitMultiMode;
 
 // ------------------- Init -------------------
 moreBtn.onclick = loadNextImages;
-loadNextImages();
+loadFolderConfig();
+/* loadNextImages(); */
