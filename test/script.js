@@ -218,23 +218,27 @@ function addImages(files){
 
   newImages.forEach(img => modalImageIds.push(img.id));
   loadedImages = loadedImages.concat(newImages);
-  renderMasonry(loadedImages);
+  renderMasonry(newImages);
 });
 }
 
 // render Masonry
 function renderMasonry(images){
 
-  const columnCount = getColumnCount();
-  gallery.innerHTML = "";
+  let columns = document.querySelectorAll(".masonry-column");
 
-  const columns = [];
+  // kalau belum ada column, bina sekali sahaja
+  if(columns.length === 0){
 
-  for(let i=0;i<columnCount;i++){
-    const col = document.createElement("div");
-    col.className = "masonry-column";
-    gallery.appendChild(col);
-    columns.push(col);
+    const columnCount = getColumnCount();
+
+    for(let i=0;i<columnCount;i++){
+      const col = document.createElement("div");
+      col.className = "masonry-column";
+      gallery.appendChild(col);
+    }
+
+    columns = document.querySelectorAll(".masonry-column");
   }
 
   images.forEach(item=>{
@@ -242,8 +246,8 @@ function renderMasonry(images){
     img.src = item.thumb;
 
     img.onload = ()=>{
-      const shortestColumn = columns.reduce((prev, curr)=>
-        prev.scrollHeight <= curr.scrollHeight ? prev : curr
+      const shortestColumn = Array.from(columns).reduce((prev, curr)=>
+        prev.offsetHeight <= curr.offsetHeight ? prev : curr
       );
 
       shortestColumn.appendChild(img);
@@ -267,6 +271,12 @@ function renderMasonry(images){
     };
   });
 }
+
+window.addEventListener("resize", ()=>{
+  gallery.innerHTML = "";
+  renderMasonry(loadedImages);
+});
+
 
 function getColumnCount(){
   const width = window.innerWidth;
