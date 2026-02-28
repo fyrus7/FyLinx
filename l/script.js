@@ -131,8 +131,6 @@ async function loadNextImages(){
 
   const res = await fetch(url);
   const data = await res.json();
-  
-  console.log("Drive response:", data); 
 
   nextPageToken = data.nextPageToken || null;
 
