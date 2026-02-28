@@ -56,11 +56,10 @@ button{
   display:flex;
   gap:6px;
   width:100%;
-  margin:0 auto;
 }
 
 .masonry-column{
-  flex:1;
+  flex:1;              /* WAJIB */
   display:flex;
   flex-direction:column;
   gap:6px;
@@ -68,8 +67,8 @@ button{
 
 #imageGrid img{
   width:100%;
+  display:block;       /* tambah ini */
   border-radius:4px;
-  object-fit:cover;
 }
 
 footer{
