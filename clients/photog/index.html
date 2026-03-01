@@ -42,6 +42,7 @@ input{
   background:#2a2a2a;
   color:#fff;
   font-size:14px;
+  box-sizing:border-box;
 }
 
 input::placeholder{
@@ -93,9 +94,9 @@ button:disabled{
   <h2>Add Gallery</h2>
 
   <form id="galleryForm">
-    <input type="text" id="slug" placeholder="Unique Path (example: mygallery)" required>
+    <input type="text" id="slug" placeholder="Unique Path (eg: mygallery)" required>
     <input type="text" id="folder" placeholder="Google Drive Public URL" required>
-    <input type="text" id="title" placeholder="Display Title">
+    <input type="text" id="title" placeholder="Display Title (eg: Wedding of John & Jane">
     <input type="text" id="token" placeholder="Token" required>
 
     <button type="submit" id="submitBtn">
@@ -108,7 +109,7 @@ button:disabled{
 
 <script>
 
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqYA9a3jYGkb03QQ0-IyCaqZQbKlumQjvJYCBlsrLepN-XlZ0AszNF1oLhAU_j093-zQ/exec"; // ← tukar ini
+const FYLINX_GALLERY = "https://script.google.com/macros/s/AKfycbyqYA9a3jYGkb03QQ0-IyCaqZQbKlumQjvJYCBlsrLepN-XlZ0AszNF1oLhAU_j093-zQ/exec"; // ← tukar ini
 
 const form = document.getElementById("galleryForm");
 const messageBox = document.getElementById("message");
@@ -133,7 +134,7 @@ form.addEventListener("submit", async function(e){
 
   try{
 
-    const res = await fetch(APPS_SCRIPT_URL, {
+    const res = await fetch(FYLINX_GALLERY, {
       method: "POST",
       body: JSON.stringify(payload)
     });
