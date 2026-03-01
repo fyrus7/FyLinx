@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FyLinx Admin</title>
+
+<style>
+body{
+  margin:0;
+  font-family:system-ui, sans-serif;
+  background:#111;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:100vh;
+}
+
+.container{
+  width:100%;
+  max-width:420px;
+  background:#1a1a1a;
+  padding:24px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
+
+h2{
+  margin-top:0;
+  font-weight:600;
+  text-align:center;
+}
+
+input{
+  width:100%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:8px;
+  border:none;
+  outline:none;
+  background:#2a2a2a;
+  color:#fff;
+  font-size:14px;
+}
+
+input::placeholder{
+  color:#aaa;
+}
+
+button{
+  width:100%;
+  padding:12px;
+  margin-top:12px;
+  border:none;
+  border-radius:8px;
+  font-size:14px;
+  cursor:pointer;
+  background:#fff;
+  color:#111;
+  font-weight:600;
+  transition:.2s;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.message{
+  margin-top:14px;
+  font-size:13px;
+  text-align:center;
+}
+
+.success{
+  color:#4caf50;
+}
+
+.error{
+  color:#ff5252;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+  <h2>Add Gallery</h2>
+
+  <form id="galleryForm">
+    <input type="text" id="slug" placeholder="Slug (example: ijoikila)" required>
+    <input type="text" id="folder" placeholder="Google Drive Folder ID" required>
+    <input type="text" id="title" placeholder="Display Title">
+    <input type="password" id="token" placeholder="One-Time Token" required>
+
+    <button type="submit" id="submitBtn">
+      Submit Gallery
+    </button>
+  </form>
+
+  <div id="message" class="message"></div>
+</div>
+
+<script>
+
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyqYA9a3jYGkb03QQ0-IyCaqZQbKlumQjvJYCBlsrLepN-XlZ0AszNF1oLhAU_j093-zQ/exec"; // ← tukar ini
+
+const form = document.getElementById("galleryForm");
+const messageBox = document.getElementById("message");
+const submitBtn = document.getElementById("submitBtn");
+
+form.addEventListener("submit", async function(e){
+
+  e.preventDefault();
+
+  messageBox.textContent = "";
+  messageBox.className = "message";
+
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Submitting...";
+
+  const payload = {
+    slug: document.getElementById("slug").value.trim(),
+    folder: document.getElementById("folder").value.trim(),
+    title: document.getElementById("title").value.trim(),
+    token: document.getElementById("token").value.trim()
+  };
+
+  try{
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+
+    const result = await res.json();
+
+    if(result.success){
+      messageBox.textContent = result.message;
+      messageBox.classList.add("success");
+      form.reset();
+    }else{
+      messageBox.textContent = result.message;
+      messageBox.classList.add("error");
+    }
+
+  }catch(err){
+    messageBox.textContent = "Network error";
+    messageBox.classList.add("error");
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.textContent = "Submit Gallery";
+});
+
+</script>
+
+</body>
+</html>w
