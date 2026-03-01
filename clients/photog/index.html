@@ -115,6 +115,19 @@ const form = document.getElementById("galleryForm");
 const messageBox = document.getElementById("message");
 const submitBtn = document.getElementById("submitBtn");
 
+function extractFolderId(input){
+
+  input = input.trim();
+
+  const match = input.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+
+  if(match){
+    return match[1];
+  }
+
+  return input; // kalau user masukkan ID sahaja
+}
+
 form.addEventListener("submit", async function(e){
 
   e.preventDefault();
@@ -125,9 +138,20 @@ form.addEventListener("submit", async function(e){
   submitBtn.disabled = true;
   submitBtn.textContent = "Submitting...";
 
+  const rawFolderInput = document.getElementById("folder").value.trim();
+  const folderId = extractFolderId(rawFolderInput);
+
+  if(!/^[a-zA-Z0-9_-]{20,}$/.test(folderId)){
+    messageBox.textContent = "Invalid Google Drive Folder Link";
+    messageBox.classList.add("error");
+    submitBtn.disabled = false;
+    submitBtn.textContent = "Submit Gallery";
+    return;
+  }
+  
   const payload = {
-    slug: document.getElementById("slug").value.trim(),
-    folder: document.getElementById("folder").value.trim(),
+    slug: document.getElementById("slug").value.trim().toLowerCase(),
+    folder: folderId,
     title: document.getElementById("title").value.trim(),
     token: document.getElementById("token").value.trim()
   };
