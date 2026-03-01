@@ -19,7 +19,7 @@ body{
 
 .container{
   width:90%;
-  max-width:420px;
+  max-width:300px;
   background:#1a1a1a;
   padding:24px;
   border-radius:12px;
@@ -93,10 +93,10 @@ button:disabled{
   <h2>Add Gallery</h2>
 
   <form id="galleryForm">
-    <input type="text" id="slug" placeholder="Slug (example: ijoikila)" required>
-    <input type="text" id="folder" placeholder="Google Drive Folder ID" required>
+    <input type="text" id="slug" placeholder="Unique Path (example: mygallery)" required>
+    <input type="text" id="folder" placeholder="Google Drive Public URL" required>
     <input type="text" id="title" placeholder="Display Title">
-    <input type="text" id="token" placeholder="One-Time Token" required>
+    <input type="text" id="token" placeholder="Token" required>
 
     <button type="submit" id="submitBtn">
       Submit Gallery
