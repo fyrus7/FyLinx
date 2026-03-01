@@ -16,7 +16,7 @@ async function loadFolderConfig(){
   }
 
   try{
-    const res = await fetch("https://script.google.com/macros/s/XXXXX/exec?t=" + Date.now());
+    const res = await fetch("https://script.google.com/macros/s/AKfycbyqYA9a3jYGkb03QQ0-IyCaqZQbKlumQjvJYCBlsrLepN-XlZ0AszNF1oLhAU_j093-zQ/exec?t=" + Date.now());
     const FOLDER_MAP = await res.json();
 
     const config = FOLDER_MAP[slug];
