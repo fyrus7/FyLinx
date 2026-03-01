@@ -159,7 +159,7 @@ async function loadNextImages(){
   nextPageToken = data.nextPageToken || null;
 
   const sorted = data.files
-    .sort((b, a) => extractNumber(b.name) - extractNumber(a.name));
+    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
 
   addImages(sorted);
 
