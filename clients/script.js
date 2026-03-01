@@ -1,6 +1,6 @@
 function getSlug(){
   const params = new URLSearchParams(window.location.search);
-  return params.get("live")?.toLowerCase() || null;
+  return params.get("gallery")?.toLowerCase() || null;
 }
 
 const slug = getSlug();
@@ -40,18 +40,6 @@ async function loadFolderConfig(){
     document.body.innerHTML = "<h2>Config error</h2>";
   }
 }
-/*
-const FOLDER_MAP = {
-  ijoikila: "1qEfxwXgPcvEPRlBKNNecsHaqFSRrAjTE",
-  zureenyanty: "1xGqkPTjU9Z9eIXJWHrnFc8ebd3jadsKA"
-};
-
-const FOLDER_ID = FOLDER_MAP[slug];
-
-if (!FOLDER_ID) {
-  document.body.innerHTML = "<h2>Gallery not found</h2>";
-  throw new Error("Invalid slug");
-} */
 
 const API_KEY   = "AIzaSyCyL4jxLN9w87WG20GqeEIAaUCupjKmn8U";
 
@@ -171,7 +159,7 @@ async function loadNextImages(){
   nextPageToken = data.nextPageToken || null;
 
   const sorted = data.files
-    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
+    .sort((a, b) => extractNumber(a.name) - extractNumber(b.name));
 
   addImages(sorted);
 
