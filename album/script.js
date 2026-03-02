@@ -460,6 +460,14 @@ function exitMultiMode(){
 
 multiCancel.onclick = exitMultiMode;
 
+// auto load
+const scrollObserver = new IntersectionObserver(entries => {
+  if(entries[0].isIntersecting && nextPageToken && !isLoading){
+    loadNextImages();
+  }
+},{
+  rootMargin: "400px"
+});
 // ------------------- Init -------------------
 // moreBtn.onclick = loadNextImages;
 loadFolderConfig();
