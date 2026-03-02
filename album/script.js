@@ -249,15 +249,15 @@ function renderGrid(images){
 
   images.forEach(item=>{
 
-/*    const wrapper = document.createElement("div");
-    wrapper.className = "thumb"; */
+    const wrapper = document.createElement("div");
+    wrapper.className = "thumb";
+
+/*    const img = document.createElement("img");
+    img.src = item.thumb; */
     const img = document.createElement("img"); // auto load
     img.dataset.src = item.thumb;              // auto load
     img.loading = "lazy";                      // auto load
     img.classList.add("lazy-thumb");           // auto load 
-
-    const img = document.createElement("img");
-    img.src = item.thumb;
 
     wrapper.appendChild(img);
     imageObserver.observe(img); // auto load
