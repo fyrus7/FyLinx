@@ -61,19 +61,6 @@ let modalImageIds = [];
 let currentIndex = 0;
 const loadedImageSet = new Set();
 
-// NEW
-const imageObserver = new IntersectionObserver((entries, observer) => {
-  entries.forEach(entry => {
-    if(entry.isIntersecting){
-      const img = entry.target;
-      img.src = img.dataset.src;
-      observer.unobserve(img);
-    }
-  });
-},{
-  rootMargin: "200px"
-});
-
 // ------------------- Download ---------------------
 async function downloadCurrentImage(){
 
@@ -223,6 +210,21 @@ function addImages(files){
 });
 }
 
+// NEW
+const imageObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const img = entry.target;
+      if(img.dataset.src){
+        img.src = img.dataset.src;
+      }
+      observer.unobserve(img);
+    }
+  });
+},{
+  rootMargin: "200px"
+});
+
 function renderGrid(images){
 
   images.forEach(item=>{
@@ -237,7 +239,7 @@ function renderGrid(images){
     img.loading = "lazy";
     img.classList.add("lazy-thumb");
 
-/*    wrapper.appendChild(img); */
+    wrapper.appendChild(img);
     imageObserver.observe(img);
 
     wrapper.onclick = ()=>{
