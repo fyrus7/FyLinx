@@ -62,6 +62,7 @@ button{
   gap:6px;
   width:100%;
   margin:0 auto;
+  padding:0 10px;
 }
 
 /* Desktop */
@@ -98,6 +99,7 @@ footer{
   font-size:11px;
   padding:12px;
   opacity:.5;
+  padding:0 10px;
 }
 
 /* Modal */
