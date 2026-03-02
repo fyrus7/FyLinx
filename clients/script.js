@@ -61,6 +61,19 @@ let modalImageIds = [];
 let currentIndex = 0;
 const loadedImageSet = new Set();
 
+// NEW
+const imageObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const img = entry.target;
+      img.src = img.dataset.src;
+      observer.unobserve(img);
+    }
+  });
+},{
+  rootMargin: "200px"
+});
+
 // ------------------- Download ---------------------
 async function downloadCurrentImage(){
 
@@ -114,14 +127,14 @@ downloadBtn.addEventListener("click", e=>{
   downloadCurrentImage();
 });
 // ------------------- MORE button -------------------
-const moreBtn = document.createElement("button");
+/* const moreBtn = document.createElement("button");
 moreBtn.classList.add("btn-dark");
 moreBtn.textContent = "More";
 moreBtn.style.display = "block";
 moreBtn.style.margin = "16px auto";
 moreBtn.style.padding = "8px 16px";
 moreBtn.style.fontSize = "12px";
-gallery.after(moreBtn);
+gallery.after(moreBtn); */
 
 // ------------------- util: extract number from filename -------------------
 function extractNumber(name){
@@ -136,8 +149,8 @@ async function loadNextImages(){
   if(isLoading) return; // elak double click
   isLoading = true;
 
-  moreBtn.disabled = true;
-  moreBtn.textContent = "Loading...";
+/*  moreBtn.disabled = true;
+  moreBtn.textContent = "Loading..."; */
 
   const query = encodeURIComponent(
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
@@ -146,7 +159,7 @@ async function loadNextImages(){
   let url =
     `https://www.googleapis.com/drive/v3/files?` +
     `q=${query}` +
-    `&orderBy=name asc` +
+    `&orderBy=name asc` + // desc for Z > A, asc for A > Z
     `&pageSize=${PAGE_SIZE}` +
     `&fields=nextPageToken,files(id,name)` +
     `&key=${API_KEY}`;
@@ -165,13 +178,13 @@ async function loadNextImages(){
 
   // reset button
   isLoading = false;
-  moreBtn.disabled = false;
+/*  moreBtn.disabled = false;
   moreBtn.textContent = "More";
 
   if(!nextPageToken){
    // moreBtn.style.display = "none";
     moreBtn.style.visibility = "hidden";
-  }
+  } */
 }
 
 // ------------------- Add image -------------------
@@ -217,10 +230,15 @@ function renderGrid(images){
     const wrapper = document.createElement("div");
     wrapper.className = "thumb";
 
+/*    const img = document.createElement("img");
+    img.src = item.thumb; */
     const img = document.createElement("img");
-    img.src = item.thumb;
+    img.dataset.src = item.thumb;
+    img.loading = "lazy";
+    img.classList.add("lazy-thumb");
 
-    wrapper.appendChild(img);
+/*    wrapper.appendChild(img); */
+    imageObserver.observe(img);
 
     wrapper.onclick = ()=>{
       if(!selectMode){
@@ -421,7 +439,18 @@ function exitMultiMode(){
 
 multiCancel.onclick = exitMultiMode;
 
+// NEW
+const scrollObserver = new IntersectionObserver(entries => {
+  if(entries[0].isIntersecting && nextPageToken && !isLoading){
+    loadNextImages();
+  }
+},{
+  rootMargin: "400px"
+});
 // ------------------- Init -------------------
-moreBtn.onclick = loadNextImages;
+/* moreBtn.onclick = loadNextImages; */
 loadFolderConfig();
+// NEW
+const sentinel = document.getElementById("scrollSentinel");
+scrollObserver.observe(sentinel);
 /* loadNextImages(); */
