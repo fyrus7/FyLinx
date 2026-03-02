@@ -7,7 +7,7 @@ html{
 
 body{
   margin:0;
-/*  padding:0 10px;   /* ini buat page ada ruang kiri kanan */
+  padding:0 10px;   /* ini buat page ada ruang kiri kanan */
   font-family:system-ui, sans-serif;
   background:#111;
   color:#fff;
@@ -62,7 +62,7 @@ button{
   gap:6px;
   width:100%;
   margin:0 auto;
-  padding:0 10px;
+/*  padding:0 10px; */
 }
 
 /* Desktop */
@@ -99,7 +99,7 @@ footer{
   font-size:11px;
   padding:12px;
   opacity:.5;
-  padding:0 10px;
+/*  padding:0 10px; */
 }
 
 /* Modal */
