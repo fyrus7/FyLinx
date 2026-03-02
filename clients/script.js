@@ -418,7 +418,7 @@ selectBtn.onclick = ()=>{
   multiCount.textContent = 0;
 
 //  moreBtn.style.display = "none";
-  moreBtn.style.visibility = "hidden";
+//  moreBtn.style.visibility = "hidden";
 };
 
 function exitMultiMode(){
@@ -428,10 +428,10 @@ function exitMultiMode(){
   multiBar.style.display = "none";
   selectBtn.style.display = "inline-block";
 
-  if(nextPageToken){
+/*  if(nextPageToken){
    // moreBtn.style.display = "block";
     moreBtn.style.visibility = "visible";
-  }
+  } */
 
   document.querySelectorAll(".selected")
     .forEach(el=>el.classList.remove("selected"));
