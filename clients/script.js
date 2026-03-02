@@ -146,7 +146,7 @@ async function loadNextImages(){
   let url =
     `https://www.googleapis.com/drive/v3/files?` +
     `q=${query}` +
-    `&orderBy=name desc` +
+    `&orderBy=name asc` +
     `&pageSize=${PAGE_SIZE}` +
     `&fields=nextPageToken,files(id,name)` +
     `&key=${API_KEY}`;
@@ -159,7 +159,7 @@ async function loadNextImages(){
   nextPageToken = data.nextPageToken || null;
 
   const sorted = data.files
-    .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
+    .sort((a, b) => extractNumber(a.name) - extractNumber(b.name));
 
   addImages(sorted);
 
