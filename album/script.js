@@ -68,6 +68,7 @@ const multiBar = document.getElementById("multiBar");
 const multiDownload = document.getElementById("multiDownload");
 const multiCancel = document.getElementById("multiCancel");
 const multiCount = document.getElementById("multiCount");
+const batchLoader = document.getElementById("batchLoader"); // auto load
 
 let modalImageIds = [];
 let currentIndex = 0;
@@ -126,7 +127,7 @@ downloadBtn.addEventListener("click", e=>{
   downloadCurrentImage();
 });
 // ------------------- MORE button -------------------
-const moreBtn = document.createElement("button");
+/* const moreBtn = document.createElement("button");
 moreBtn.classList.add("btn-dark");
 moreBtn.textContent = "More";
 moreBtn.style.display = "block";
@@ -134,7 +135,7 @@ moreBtn.style.margin = "16px auto";
 moreBtn.style.padding = "8px 16px";
 moreBtn.style.fontSize = "12px";
 gallery.after(moreBtn);
-
+*/
 // ------------------- util: extract number from filename -------------------
 function extractNumber(name){
   // ambil nombor terakhir dalam nama (IMG_2024_2001.jpg → 2001)
@@ -148,8 +149,8 @@ async function loadNextImages(){
   if(isLoading) return; // elak double click
   isLoading = true;
 
-  moreBtn.disabled = true;
-  moreBtn.textContent = "Loading...";
+/*  moreBtn.disabled = true;
+  moreBtn.textContent = "Loading..."; */
 
   const query = encodeURIComponent(
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
@@ -170,6 +171,11 @@ async function loadNextImages(){
 
   nextPageToken = data.nextPageToken || null;
 
+  // auto load
+  if(!nextPageToken){
+    scrollObserver.unobserve(document.getElementById("scrollSentinel"));
+  }
+
   const sorted = data.files
     .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
 
@@ -177,13 +183,14 @@ async function loadNextImages(){
 
   // reset button
   isLoading = false;
-  moreBtn.disabled = false;
+  batchLoader.style.display = "none"; // auto load
+/*  moreBtn.disabled = false;
   moreBtn.textContent = "More";
 
   if(!nextPageToken){
    // moreBtn.style.display = "none";
     moreBtn.style.visibility = "hidden";
-  }
+  } */
 }
 
 // ------------------- Add image -------------------
@@ -222,17 +229,38 @@ function addImages(files){
 });
 }
 
+// auto load
+const imageObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const img = entry.target;
+      if(img.dataset.src){
+        img.src = img.dataset.src;
+      }
+      observer.unobserve(img);
+    }
+  });
+},{
+  rootMargin: "200px"
+});
+
+
 function renderGrid(images){
 
   images.forEach(item=>{
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "thumb";
+/*    const wrapper = document.createElement("div");
+    wrapper.className = "thumb"; */
+    const img = document.createElement("img"); // auto load
+    img.dataset.src = item.thumb;              // auto load
+    img.loading = "lazy";                      // auto load
+    img.classList.add("lazy-thumb");           // auto load 
 
     const img = document.createElement("img");
     img.src = item.thumb;
 
     wrapper.appendChild(img);
+    imageObserver.observe(img); // auto load
 
     wrapper.onclick = ()=>{
       if(!selectMode){
@@ -411,8 +439,7 @@ selectBtn.onclick = ()=>{
   multiBar.style.display = "flex";
   multiCount.textContent = 0;
 
-//  moreBtn.style.display = "none";
-  moreBtn.style.visibility = "hidden";
+//  moreBtn.style.visibility = "hidden";
 };
 
 function exitMultiMode(){
@@ -422,10 +449,10 @@ function exitMultiMode(){
   multiBar.style.display = "none";
   selectBtn.style.display = "inline-block";
 
-  if(nextPageToken){
+/*  if(nextPageToken){
    // moreBtn.style.display = "block";
     moreBtn.style.visibility = "visible";
-  }
+  } */
 
   document.querySelectorAll(".selected")
     .forEach(el=>el.classList.remove("selected"));
@@ -434,6 +461,7 @@ function exitMultiMode(){
 multiCancel.onclick = exitMultiMode;
 
 // ------------------- Init -------------------
-moreBtn.onclick = loadNextImages;
+// moreBtn.onclick = loadNextImages;
 loadFolderConfig();
-/* loadNextImages(); */
+const sentinel = document.getElementById("scrollSentinel"); // auto load
+scrollObserver.observe(sentinel);                           // auto load
