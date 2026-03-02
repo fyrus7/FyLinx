@@ -56,6 +56,7 @@ const multiBar = document.getElementById("multiBar");
 const multiDownload = document.getElementById("multiDownload");
 const multiCancel = document.getElementById("multiCancel");
 const multiCount = document.getElementById("multiCount");
+const batchLoader = document.getElementById("batchLoader");
 
 let modalImageIds = [];
 let currentIndex = 0;
@@ -136,6 +137,8 @@ async function loadNextImages(){
   if(isLoading) return; // elak double click
   isLoading = true;
 
+  batchLoader.style.display = "block";
+
 /*  moreBtn.disabled = true;
   moreBtn.textContent = "Loading..."; */
 
@@ -158,6 +161,10 @@ async function loadNextImages(){
 
   nextPageToken = data.nextPageToken || null;
 
+  if(!nextPageToken){
+  scrollObserver.unobserve(document.getElementById("scrollSentinel"));
+}
+
   const sorted = data.files
     .sort((a, b) => extractNumber(a.name) - extractNumber(b.name));
 
@@ -165,6 +172,7 @@ async function loadNextImages(){
 
   // reset button
   isLoading = false;
+  batchLoader.style.display = "none";   // 🔥 tambah ini
 /*  moreBtn.disabled = false;
   moreBtn.textContent = "More";
 
