@@ -95,6 +95,7 @@ button:disabled{
 
   <form id="galleryForm">
     <input type="text" id="slug" placeholder="Unique Path (eg: mygallery)" required>
+    <div id="previewUrl" style="font-size:12px; margin-top:6px; color:#aaa;"></div>
     <input type="text" id="folder" placeholder="Google Drive Public URL" required>
     <input type="text" id="title" placeholder="Display Title (eg: Wedding of John & Jane">
     <input type="text" id="token" placeholder="Token" required>
@@ -127,6 +128,19 @@ function extractFolderId(input){
 
   return input; // kalau user masukkan ID sahaja
 }
+
+const slugInput = document.getElementById("slug");
+const previewBox = document.getElementById("previewUrl");
+
+slugInput.addEventListener("input", function(){
+  const value = slugInput.value.trim().toLowerCase();
+  if(value){
+    previewBox.textContent =
+      "URL: https://fylinx.pages.dev/clients/?gallery=" + value;
+  }else{
+    previewBox.textContent = "";
+  }
+});
 
 form.addEventListener("submit", async function(e){
 
@@ -166,9 +180,49 @@ form.addEventListener("submit", async function(e){
     const result = await res.json();
 
     if(result.success){
-      messageBox.textContent = result.message;
+      
+      const finalSlug = payload.slug;
+      const finalUrl =
+        "https://fylinx.pages.dev/clients/?gallery=" + finalSlug;
+      
+      messageBox.innerHTML =
+        "Gallery Created Successfully<br><br>" +
+        "<input id='generatedUrl' type='text' value='" + finalUrl + "' readonly " +
+        "style='width:100%;padding:8px;border-radius:6px;border:none;background:#2a2a2a;color:#fff;margin-bottom:8px;'>" +
+        "<button id='copyBtn' style='width:100%;padding:8px;border-radius:6px;border:none;background:#fff;color:#111;font-weight:600;cursor:pointer;'>Copy URL</button>";
+      
       messageBox.classList.add("success");
+      
       form.reset();
+      previewBox.textContent = "";
+      
+      setTimeout(()=>{
+        const urlInput = document.getElementById("generatedUrl");
+        const copyBtn = document.getElementById("copyBtn");
+        
+        async function copyUrl(){
+          try{
+            await navigator.clipboard.writeText(finalUrl);
+            copyBtn.textContent = "Copied ✓";
+            setTimeout(()=>{
+              copyBtn.textContent = "Copy URL";
+            },1500);
+          }catch{
+            urlInput.select();
+            document.execCommand("copy");
+            copyBtn.textContent = "Copied ✓";
+            setTimeout(()=>{
+              copyBtn.textContent = "Copy URL";
+            },1500);
+          }
+        }
+        
+        copyBtn.addEventListener("click", copyUrl);
+        
+        // 🔥 Auto copy terus bila berjaya
+        copyUrl();
+      
+      }, 50);
     }else{
       messageBox.textContent = result.message;
       messageBox.classList.add("error");
