@@ -149,6 +149,8 @@ async function loadNextImages(){
   if(isLoading) return; // elak double click
   isLoading = true;
 
+  batchLoader.style.display = "block"; // auto load
+
 /*  moreBtn.disabled = true;
   moreBtn.textContent = "Loading..."; */
 
