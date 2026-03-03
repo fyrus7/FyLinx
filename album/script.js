@@ -181,7 +181,7 @@ async function loadNextImages(){
   const sorted = data.files
     .sort((a, b) => extractNumber(b.name) - extractNumber(a.name));
 
-  addImages(sorted);
+  await addImages(sorted);
 
   // reset button
   isLoading = false;
@@ -199,6 +199,7 @@ async function loadNextImages(){
 let loadedImages = [];
 
 function addImages(files){
+  return new Promise(resolve=>{ // fix loading
 
   const preload = files.map(file => new Promise(resolve=>{
     const img = new Image();
@@ -228,6 +229,9 @@ function addImages(files){
   newImages.forEach(img => modalImageIds.push(img.id));
   loadedImages = loadedImages.concat(newImages);
   renderGrid(newImages);
+
+    resolve(); // fix loading
+  }); // fix loading
 });
 }
 
@@ -261,6 +265,10 @@ function renderGrid(images){
     img.loading = "lazy";                      // auto load
     img.classList.add("lazy-thumb");           // auto load 
 
+    img.onload = ()=>{             // loading effect
+      img.classList.add("loaded"); // loading effect
+    };
+    
     wrapper.appendChild(img);
     imageObserver.observe(img); // auto load
 
