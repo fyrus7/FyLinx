@@ -296,12 +296,19 @@ function renderGrid(images){
 }
 
 // viewport fix
-function ensureScrollable(){ 
-  const isScrollable = document.documentElement.scrollHeight > window.innerHeight;
+function ensureScrollable(){
 
-  if(!isScrollable && nextPageToken && !isLoading){
-    loadNextImages();
-  }
+  requestAnimationFrame(() => {
+
+    const doc = document.documentElement;
+    const isScrollable = doc.scrollHeight > window.innerHeight;
+
+    if(!isScrollable && nextPageToken && !isLoading){
+      loadNextImages();
+    }
+
+  });
+
 }
 
 // ------------------- Modal -------------------
