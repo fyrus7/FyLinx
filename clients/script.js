@@ -1,4 +1,4 @@
-function getSlug(){
+wfunction getSlug(){
   const params = new URLSearchParams(window.location.search);
   return params.get("gallery")?.toLowerCase() || null;
 }
@@ -168,7 +168,7 @@ async function loadNextImages(){
   const sorted = data.files
     .sort((a, b) => extractNumber(a.name) - extractNumber(b.name));
 
-  addImages(sorted);
+  await addImages(sorted);
 
   // reset button
   isLoading = false;
@@ -186,6 +186,7 @@ async function loadNextImages(){
 let loadedImages = [];
 
 function addImages(files){
+  return new Promise(resolve=>{
 
   const preload = files.map(file => new Promise(resolve=>{
     const img = new Image();
@@ -215,6 +216,9 @@ function addImages(files){
   newImages.forEach(img => modalImageIds.push(img.id));
   loadedImages = loadedImages.concat(newImages);
   renderGrid(newImages);
+
+    resolve();
+  });
 });
 }
 
