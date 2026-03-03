@@ -186,6 +186,7 @@ async function loadNextImages(){
   // reset button
   isLoading = false;
   batchLoader.style.display = "none"; // auto load
+  ensureScrollable(); // fix auto load viewport
 /*  moreBtn.disabled = false;
   moreBtn.textContent = "More";
 
@@ -229,7 +230,7 @@ function addImages(files){
   newImages.forEach(img => modalImageIds.push(img.id));
   loadedImages = loadedImages.concat(newImages);
   renderGrid(newImages);
-  ensureScrollable(); // viewport fix
+//  ensureScrollable(); // viewport fix
 
     resolve(); // fix loading
   }); // fix loading
