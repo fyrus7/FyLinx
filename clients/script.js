@@ -1,4 +1,4 @@
-wfunction getSlug(){
+function getSlug(){
   const params = new URLSearchParams(window.location.search);
   return params.get("gallery")?.toLowerCase() || null;
 }
