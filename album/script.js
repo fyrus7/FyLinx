@@ -507,3 +507,16 @@ const scrollObserver = new IntersectionObserver(entries => {
 loadFolderConfig();
 const sentinel = document.getElementById("scrollSentinel"); // auto load
 scrollObserver.observe(sentinel);                           // auto load
+
+window.addEventListener("scroll", () => {
+
+  if(isLoading || !nextPageToken) return;
+
+  const scrollPosition = window.innerHeight + window.scrollY;
+  const threshold = document.body.offsetHeight - 200;
+
+  if(scrollPosition >= threshold){
+    loadNextImages();
+  }
+
+});
