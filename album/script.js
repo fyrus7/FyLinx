@@ -187,6 +187,12 @@ async function loadNextImages(){
   isLoading = false;
   batchLoader.style.display = "none"; // auto load
   ensureScrollable(); // fix auto load viewport
+
+  // 🔥 re-check sentinel manually
+  const rect = sentinel.getBoundingClientRect();
+  if(rect.top <= window.innerHeight && nextPageToken && !isLoading){
+    loadNextImages();
+  }
 /*  moreBtn.disabled = false;
   moreBtn.textContent = "More";
 
