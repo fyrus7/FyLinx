@@ -229,6 +229,7 @@ function addImages(files){
   newImages.forEach(img => modalImageIds.push(img.id));
   loadedImages = loadedImages.concat(newImages);
   renderGrid(newImages);
+  ensureScrollable(); // viewport fix
 
     resolve(); // fix loading
   }); // fix loading
@@ -291,6 +292,15 @@ function renderGrid(images){
 
     gallery.appendChild(wrapper);
   });
+}
+
+// viewport fix
+function ensureScrollable(){ 
+  const isScrollable = document.documentElement.scrollHeight > window.innerHeight;
+
+  if(!isScrollable && nextPageToken && !isLoading){
+    loadNextImages();
+  }
 }
 
 // ------------------- Modal -------------------
