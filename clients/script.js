@@ -207,8 +207,6 @@ function addImages(files){
     renderGrid([item]); // render terus
 
   });
-
-};
 }
 
 // NEW
