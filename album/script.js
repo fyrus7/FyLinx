@@ -199,7 +199,7 @@ async function loadNextImages(){
 
 // ------------------- Add image -------------------
 let loadedImages = [];
-
+/*
 function addImages(files){
   return new Promise(resolve=>{ // fix loading
 
@@ -236,6 +236,31 @@ function addImages(files){
     resolve(); // fix loading
   }); // fix loading
 });
+}
+*/
+// Faster addimage
+function addImages(files){
+
+  files.forEach(file=>{
+
+    if(loadedImageSet.has(file.id)) return;
+    loadedImageSet.add(file.id);
+
+    const thumb = `https://lh3.googleusercontent.com/d/${file.id}=w400`;
+
+    const item = {
+      id: file.id,
+      name: file.name,
+      thumb: thumb,
+      full: `https://lh3.googleusercontent.com/d/${file.id}`,
+    };
+
+    modalImageIds.push(item.id);
+    loadedImages.push(item);
+
+    renderGrid([item]); // render terus
+
+  });
 }
 
 // auto load
