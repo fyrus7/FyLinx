@@ -186,39 +186,28 @@ async function loadNextImages(){
 let loadedImages = [];
 
 function addImages(files){
-  return new Promise(resolve=>{ // fix loading
 
-  const preload = files.map(file => new Promise(resolve=>{
-    const img = new Image();
-    img.onload = ()=>{
-      resolve({
-        id: file.id,
-        name: file.name,
-        thumb: `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`,
-        full: `https://lh3.googleusercontent.com/d/${file.id}`,
-        ratio: img.naturalWidth / img.naturalHeight
-      });
+  files.forEach(file=>{
+
+    if(loadedImageSet.has(file.id)) return;
+    loadedImageSet.add(file.id);
+
+    const thumb = `https://lh3.googleusercontent.com/d/${file.id}=w400`;
+
+    const item = {
+      id: file.id,
+      name: file.name,
+      thumb: thumb,
+      full: `https://lh3.googleusercontent.com/d/${file.id}`,
     };
-    img.src = `https://drive.google.com/thumbnail?id=${file.id}&sz=w800`;
-  }));
 
-  Promise.all(preload).then(images=>{
+    modalImageIds.push(item.id);
+    loadedImages.push(item);
 
-  // filter gambar yang belum pernah load
-  const newImages = images.filter(img => {
-    if(loadedImageSet.has(img.id)) return false;
-    loadedImageSet.add(img.id);
-    return true;
+    renderGrid([item]); // render terus
+
   });
 
-  if(newImages.length === 0) return;
-
-  newImages.forEach(img => modalImageIds.push(img.id));
-  loadedImages = loadedImages.concat(newImages);
-  renderGrid(newImages);
-
-    resolve(); // fix loading
-  }); // fix loading
 });
 }
 
