@@ -246,7 +246,8 @@ function addImages(files){
     if(loadedImageSet.has(file.id)) return;
     loadedImageSet.add(file.id);
 
-    const thumb = `https://lh3.googleusercontent.com/d/${file.id}=w400`;
+//    const thumb = `https://lh3.googleusercontent.com/d/${file.id}=w400`;
+    const thumb = `https://lh3.googleusercontent.com/d/${file.id}=w600-h900-c-rw`; // Ai crop
 
     const item = {
       id: file.id,
