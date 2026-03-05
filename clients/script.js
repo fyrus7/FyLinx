@@ -208,7 +208,7 @@ function addImages(files){
 
   });
 
-});
+};
 }
 
 // NEW
