@@ -153,8 +153,8 @@ a}
 
 body.modal-open{
   overflow: hidden;
-  height: 100vh;
 }
+
 button:disabled{
   opacity:0.6;
   cursor:default;
