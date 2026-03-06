@@ -114,15 +114,6 @@ downloadBtn.addEventListener("click", e=>{
   e.stopPropagation(); // elak modal tertutup
   downloadCurrentImage();
 });
-// ------------------- MORE button -------------------
-/* const moreBtn = document.createElement("button");
-moreBtn.classList.add("btn-dark");
-moreBtn.textContent = "More";
-moreBtn.style.display = "block";
-moreBtn.style.margin = "16px auto";
-moreBtn.style.padding = "8px 16px";
-moreBtn.style.fontSize = "12px";
-gallery.after(moreBtn); */
 
 // ------------------- util: extract number from filename -------------------
 function extractNumber(name){
@@ -139,10 +130,7 @@ async function loadNextImages(){
 
   batchLoader.style.display = "block";
 
-/*  moreBtn.disabled = true;
-  moreBtn.textContent = "Loading..."; */
-
-  const query = encodeURIComponent(
+  const query = encodeURIComponent(w
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
   );
 
@@ -173,13 +161,6 @@ async function loadNextImages(){
   // reset button
   isLoading = false;
   batchLoader.style.display = "none";   // 🔥 tambah ini
-/*  moreBtn.disabled = false;
-  moreBtn.textContent = "More";
-
-  if(!nextPageToken){
-   // moreBtn.style.display = "none";
-    moreBtn.style.visibility = "hidden";
-  } */
 }
 
 // ------------------- Add image -------------------
@@ -230,9 +211,7 @@ function renderGrid(images){
 
     const wrapper = document.createElement("div");
     wrapper.className = "thumb";
-
-/*    const img = document.createElement("img");
-    img.src = item.thumb; */
+a
     const img = document.createElement("img");
     img.dataset.src = item.thumb;
     img.loading = "lazy";
@@ -421,9 +400,6 @@ selectBtn.onclick = ()=>{
   selectBtn.style.display = "none";
   multiBar.style.display = "flex";
   multiCount.textContent = 0;
-
-//  moreBtn.style.display = "none";
-//  moreBtn.style.visibility = "hidden";
 };
 
 function exitMultiMode(){
@@ -433,18 +409,12 @@ function exitMultiMode(){
   multiBar.style.display = "none";
   selectBtn.style.display = "inline-block";
 
-/*  if(nextPageToken){
-   // moreBtn.style.display = "block";
-    moreBtn.style.visibility = "visible";
-  } */
-
   document.querySelectorAll(".selected")
     .forEach(el=>el.classList.remove("selected"));
 }
 
 multiCancel.onclick = exitMultiMode;
 
-// NEW
 const scrollObserver = new IntersectionObserver(entries => {
   if(entries[0].isIntersecting && nextPageToken && !isLoading){
     loadNextImages();
@@ -453,9 +423,6 @@ const scrollObserver = new IntersectionObserver(entries => {
   rootMargin: "400px"
 });
 // ------------------- Init -------------------
-/* moreBtn.onclick = loadNextImages; */
 loadFolderConfig();
-// NEW
 const sentinel = document.getElementById("scrollSentinel");
 scrollObserver.observe(sentinel);
-/* loadNextImages(); */
