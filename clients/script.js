@@ -125,12 +125,12 @@ function extractNumber(name){
 // ------------------- Load images -------------------
 async function loadNextImages(){
 
-  if(isLoading) return; // elak double click
+  if(isLoading) return;
   isLoading = true;
 
   batchLoader.style.display = "block";
 
-  const query = encodeURIComponent(w
+  const query = encodeURIComponent(
     `'${FOLDER_ID}' in parents and mimeType contains 'image/'`
   );
 
@@ -154,13 +154,13 @@ async function loadNextImages(){
 }
 
   const sorted = data.files
-    .sort((a, b) => extractNumber(a.name) - extractNumber(b.name));
+    .sort((a, b) => extractNumber(a.name) - extractNumber(b.name)); // rukar juga untuk sort
 
-  await addImages(sorted); // fix loading
+  await addImages(sorted);
 
   // reset button
   isLoading = false;
-  batchLoader.style.display = "none";   // 🔥 tambah ini
+  batchLoader.style.display = "none";
 }
 
 // ------------------- Add image -------------------
@@ -185,12 +185,11 @@ function addImages(files){
     modalImageIds.push(item.id);
     loadedImages.push(item);
 
-    renderGrid([item]); // render terus
+    renderGrid([item]);
 
   });
 }
 
-// NEW
 const imageObserver = new IntersectionObserver((entries, observer) => {
   entries.forEach(entry => {
     if(entry.isIntersecting){
@@ -211,14 +210,14 @@ function renderGrid(images){
 
     const wrapper = document.createElement("div");
     wrapper.className = "thumb";
-a
+
     const img = document.createElement("img");
     img.dataset.src = item.thumb;
     img.loading = "lazy";
     img.classList.add("lazy-thumb");
 
-    img.onload = ()=>{             // loading effect
-      img.classList.add("loaded"); // loading effect
+    img.onload = ()=>{
+      img.classList.add("loaded");
     };
 
     wrapper.appendChild(img);
@@ -424,5 +423,6 @@ const scrollObserver = new IntersectionObserver(entries => {
 });
 // ------------------- Init -------------------
 loadFolderConfig();
+
 const sentinel = document.getElementById("scrollSentinel");
 scrollObserver.observe(sentinel);
